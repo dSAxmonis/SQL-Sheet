@@ -53,6 +53,12 @@
           <button class="timer-btn" id="header-timer-toggle-btn" onclick="event.stopPropagation(); window.sqlTracker.toggleTimer();" title="Start / Pause">▶</button>
         </div>
 
+        <!-- Theme Switcher (White / Dark) -->
+        <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" onclick="window.sqlTracker.toggleTheme()" title="Toggle White/Dark Theme">
+          <span class="theme-toggle-icon" id="theme-toggle-icon">☀️</span>
+          <span id="theme-toggle-label">Theme</span>
+        </button>
+
         <!-- User Authentication Badge / Trigger -->
         <div id="auth-status-container">
           <!-- Populated by app.js: Either user profile pill or 'Sign In' button -->
@@ -115,7 +121,7 @@
       </div>
     </section>
 
-    <!-- Motion.dev Signature Rule Grid -->
+    <!-- Simplified 4-Card Progress Metrics Grid -->
     <section class="fresh-rule-grid" aria-label="Roadmap progress metrics">
       
       <!-- Col 1: Overall Progress -->
@@ -126,68 +132,50 @@
         </div>
         <div class="fresh-rule-val val-accent" id="progress-percent-text">0%</div>
         <div class="fresh-rule-desc">
-          <span id="stat-total-solved" style="font-weight: 700; color: #fff;">0</span> of 222 problems solved
+          <span id="stat-total-solved" style="font-weight: 700; color: var(--foreground);">0</span> of 222 solved
         </div>
         <div class="rule-progress-line">
           <div class="rule-progress-fill" id="overall-rule-progress-bar" style="width: 0%;"></div>
         </div>
       </div>
 
-      <!-- Col 2: Remaining -->
+      <!-- Col 2: Done (Solved) -->
       <div class="fresh-rule-col">
         <div class="fresh-rule-kicker">
-          <span>Remaining</span>
-          <span>TARGET</span>
+          <span>Done</span>
+          <span>COMPLETED</span>
         </div>
-        <div class="fresh-rule-val val-blue" id="stat-remaining">222</div>
-        <div class="fresh-rule-desc">Pace: ~11 questions / day</div>
+        <div class="fresh-rule-val val-green" id="stat-done-val">0</div>
+        <div class="fresh-rule-desc">Marked as solved ✓</div>
       </div>
 
-      <!-- Col 3: In Progress -->
-      <div class="fresh-rule-col">
-        <div class="fresh-rule-kicker">
-          <span>In Progress</span>
-          <span>ACTIVE</span>
-        </div>
-        <div class="fresh-rule-val" style="color: var(--color-amber);" id="stat-inprogress">0</div>
-        <div class="fresh-rule-desc">Currently practicing</div>
-      </div>
-
-      <!-- Col 4: Revision Queue -->
-      <div class="fresh-rule-col" style="cursor: pointer;" onclick="window.sqlTracker.switchTab('revision')">
+      <!-- Col 3: Revision Queue -->
+      <div class="fresh-rule-col" style="cursor: pointer;" onclick="window.sqlTracker.switchTab('revision')" title="Click to view Revision Queue">
         <div class="fresh-rule-kicker">
           <span>Revision Queue</span>
           <span>3-4 DAYS</span>
         </div>
         <div class="fresh-rule-val val-rose" id="stat-revision">0</div>
-        <div class="fresh-rule-desc">Marked for recall &rarr;</div>
+        <div class="fresh-rule-desc">Marked for review 🔁</div>
       </div>
 
-      <!-- Col 5: Difficulty Tiers -->
+      <!-- Col 4: Remaining & Difficulty -->
       <div class="fresh-rule-col">
         <div class="fresh-rule-kicker">
-          <span>Difficulty</span>
-          <span>RATIO</span>
+          <span>Remaining</span>
+          <span>TO GO</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
-            <span style="color: var(--color-green);">Easy</span>
-            <span id="diff-easy-count" style="color: var(--foreground-muted);">0/70</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
-            <span style="color: var(--color-amber);">Medium</span>
-            <span id="diff-medium-count" style="color: var(--foreground-muted);">0/112</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
-            <span style="color: var(--color-rose);">Hard</span>
-            <span id="diff-hard-count" style="color: var(--foreground-muted);">0/40</span>
-          </div>
+        <div class="fresh-rule-val val-blue" id="stat-remaining">222</div>
+        <div style="display: flex; gap: 8px; margin-top: 4px; font-family: var(--font-mono); font-size: 11px;">
+          <span style="color: var(--color-green);">E: <span id="diff-easy-count" style="color: var(--foreground-muted);">0/70</span></span>
+          <span style="color: var(--color-amber);">M: <span id="diff-medium-count" style="color: var(--foreground-muted);">0/112</span></span>
+          <span style="color: var(--color-rose);">H: <span id="diff-hard-count" style="color: var(--foreground-muted);">0/40</span></span>
         </div>
       </div>
 
     </section>
 
-    <!-- Controls & Filtering Toolbar (visible on Roadmap tab) -->
+    <!-- Controls & Simplified Clean Filter Toolbar (visible on Roadmap tab) -->
     <section class="motion-controls-bar" id="controls-bar-section">
       <div class="controls-top-row">
         
@@ -197,42 +185,57 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="global-search-input" class="motion-search-input" placeholder="Search problems, concepts, platforms, or days...">
+          <input type="text" id="global-search-input" class="motion-search-input" placeholder="Search questions, SQL concepts, platforms, or days...">
         </div>
 
-        <!-- Accordion Controls -->
+        <!-- Accordion Controls & Clear Filters -->
         <div class="motion-view-controls">
-          <button class="btn-ghost-sm" onclick="window.sqlTracker.expandAllDays()">Expand All</button>
-          <button class="btn-ghost-sm" onclick="window.sqlTracker.collapseAllDays()">Collapse All</button>
-          <button class="btn-reset-text" onclick="window.sqlTracker.resetFilters()">Clear Filters</button>
+          <button type="button" class="btn-ghost-sm" onclick="window.sqlTracker.expandAllDays()">Expand All</button>
+          <button type="button" class="btn-ghost-sm" onclick="window.sqlTracker.collapseAllDays()">Collapse All</button>
+          <button type="button" class="btn-reset-text" onclick="window.sqlTracker.resetFilters()">Clear Filters</button>
         </div>
 
       </div>
 
-      <!-- Filters -->
-      <div class="motion-filter-row">
-        <span class="filter-kicker">PHASE:</span>
-        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Foundation">Foundation</button>
-        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Core">Core</button>
-        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Intermediate">Intermediate</button>
-        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Advanced">Advanced</button>
-        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Capstone">Capstone</button>
+      <!-- Quick Filter Bar: Status Buttons + 3 Clean Dropdowns -->
+      <div class="controls-filter-row">
+        
+        <!-- Status Filter Pills -->
+        <div class="filter-status-group">
+          <span class="filter-label">STATUS:</span>
+          <button type="button" class="filter-status-btn active" data-val="all" onclick="window.sqlTracker.setStatusFilter('all')">All</button>
+          <button type="button" class="filter-status-btn" data-val="solved" onclick="window.sqlTracker.setStatusFilter('solved')">✓ Done</button>
+          <button type="button" class="filter-status-btn" data-val="revision" onclick="window.sqlTracker.setStatusFilter('revision')">🔁 Revision</button>
+          <button type="button" class="filter-status-btn" data-val="notstarted" onclick="window.sqlTracker.setStatusFilter('notstarted')">○ Unsolved</button>
+        </div>
 
-        <span class="filter-kicker" style="margin-left: 12px;">PLATFORM:</span>
-        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="LeetCode">LeetCode</button>
-        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="HackerRank">HackerRank</button>
-        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="DataLemur">DataLemur</button>
-        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="StrataScratch">StrataScratch</button>
+        <!-- Sleek Dropdowns -->
+        <div class="filter-selects-group">
+          <select id="phase-filter-select" class="filter-dropdown" onchange="window.sqlTracker.setFilter('phase', this.value)" title="Filter by Roadmap Phase">
+            <option value="all">All Phases</option>
+            <option value="Foundation">Phase 1: Foundation</option>
+            <option value="Core">Phase 2: Core</option>
+            <option value="Intermediate">Phase 3: Intermediate</option>
+            <option value="Advanced">Phase 4: Advanced</option>
+            <option value="Capstone">Phase 5: Capstone</option>
+          </select>
 
-        <span class="filter-kicker" style="margin-left: 12px;">DIFFICULTY:</span>
-        <button class="motion-chip filter-chip" data-filter-type="difficulty" data-filter-val="Easy">Easy</button>
-        <button class="motion-chip filter-chip" data-filter-type="difficulty" data-filter-val="Medium">Medium</button>
-        <button class="motion-chip filter-chip" data-filter-type="difficulty" data-filter-val="Hard">Hard</button>
+          <select id="platform-filter-select" class="filter-dropdown" onchange="window.sqlTracker.setFilter('platform', this.value)" title="Filter by Platform">
+            <option value="all">All Platforms</option>
+            <option value="LeetCode">LeetCode (120)</option>
+            <option value="HackerRank">HackerRank (38)</option>
+            <option value="DataLemur">DataLemur (38)</option>
+            <option value="StrataScratch">StrataScratch (26)</option>
+          </select>
 
-        <span class="filter-kicker" style="margin-left: 12px;">STATUS:</span>
-        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="solved">Done</button>
-        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="revision">Revision</button>
-        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="notstarted">Unsolved</button>
+          <select id="diff-filter-select" class="filter-dropdown" onchange="window.sqlTracker.setFilter('difficulty', this.value)" title="Filter by Difficulty">
+            <option value="all">All Difficulties</option>
+            <option value="Easy">Easy (70)</option>
+            <option value="Medium">Medium (112)</option>
+            <option value="Hard">Hard (40)</option>
+          </select>
+        </div>
+
       </div>
     </section>
 

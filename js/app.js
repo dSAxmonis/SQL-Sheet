@@ -180,10 +180,37 @@
     return list;
   }
 
+  // Theme Management (Light / Dark)
+  function initTheme() {
+    const saved = localStorage.getItem('sql_tracker_theme');
+    const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    const theme = saved || (prefersLight ? 'light' : 'dark');
+    applyTheme(theme, false);
+  }
+
+  function applyTheme(theme, showToastMsg = false) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sql_tracker_theme', theme);
+    const icon = document.getElementById('theme-toggle-icon');
+    const label = document.getElementById('theme-toggle-label');
+    if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
+    if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
+    if (showToastMsg) {
+      showToast(`Switched to ${theme === 'light' ? 'White / Light' : 'Carbon Dark'} theme`, 'info');
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    applyTheme(next, true);
+  }
+
   // =========================================================================
   // App Initialization
   // =========================================================================
   async function init() {
+    initTheme();
     loadLocalState();
     renderAuthBadge();
     setupEventListeners();
@@ -400,14 +427,14 @@
     if (ruleProgressBar) ruleProgressBar.style.width = `${percent}%`;
 
     const elTotal = document.getElementById('stat-total-solved');
+    const elDone = document.getElementById('stat-done-val');
     const elRemaining = document.getElementById('stat-remaining');
-    const elInProgress = document.getElementById('stat-inprogress');
     const elRevision = document.getElementById('stat-revision');
     const tabRevisionBadge = document.getElementById('tab-revision-count');
 
     if (elTotal) elTotal.textContent = solvedCount;
+    if (elDone) elDone.textContent = solvedCount;
     if (elRemaining) elRemaining.textContent = remainingCount;
-    if (elInProgress) elInProgress.textContent = inProgressCount;
     if (elRevision) elRevision.textContent = revisionCount;
     if (tabRevisionBadge) tabRevisionBadge.textContent = revisionCount;
 
@@ -420,18 +447,24 @@
     });
 
     SQL_ROADMAP.forEach(day => {
-      const dayTotal = day.questions.length;
-      let daySolved = 0;
-      day.questions.forEach(q => {
-        if (getQuestionData(q.id).status === 'solved') daySolved++;
-      });
-      const dayPct = dayTotal > 0 ? Math.round((daySolved / dayTotal) * 100) : 0;
-
-      const fill = document.getElementById(`day-progress-fill-${day.day}`);
-      const text = document.getElementById(`day-progress-text-${day.day}`);
-      if (fill) fill.style.width = `${dayPct}%`;
-      if (text) text.textContent = `${daySolved}/${dayTotal} (${dayPct}%)`;
+      updateDayProgressDOM(day.day);
     });
+  }
+
+  function updateDayProgressDOM(dayNum) {
+    const dayObj = SQL_ROADMAP.find(d => d.day === dayNum);
+    if (!dayObj) return;
+    const dayTotal = dayObj.questions.length;
+    let daySolved = 0;
+    dayObj.questions.forEach(q => {
+      if (getQuestionData(q.id).status === 'solved') daySolved++;
+    });
+    const dayPct = dayTotal > 0 ? Math.round((daySolved / dayTotal) * 100) : 0;
+
+    const fill = document.getElementById(`day-progress-fill-${dayNum}`);
+    const text = document.getElementById(`day-progress-text-${dayNum}`);
+    if (fill) fill.style.width = `${dayPct}%`;
+    if (text) text.textContent = `${daySolved}/${dayTotal} (${dayPct}%)`;
   }
 
   // =========================================================================
@@ -452,6 +485,7 @@
       if (controlsSection) controlsSection.style.display = 'flex';
       renderRoadmapSheet(container);
     }
+    updateAllMetrics();
   }
 
   // =========================================================================
@@ -644,6 +678,13 @@
       const isOpen = state.openDays.includes(day.day) || Boolean(state.filters.search);
       const dayIndexPadded = String(day.day).padStart(2, '0');
 
+      const dayTotal = day.questions.length;
+      let daySolved = 0;
+      day.questions.forEach(q => {
+        if (getQuestionData(q.id).status === 'solved') daySolved++;
+      });
+      const dayPct = dayTotal > 0 ? Math.round((daySolved / dayTotal) * 100) : 0;
+
       html += `
         <div class="motion-day-block ${isOpen ? 'open' : ''}" id="day-card-${day.day}">
           <div class="motion-day-header" onclick="window.sqlTracker.toggleDay(${day.day})">
@@ -660,9 +701,9 @@
             <div class="day-header-right">
               <div class="day-metric-pill">
                 <div class="day-metric-bar">
-                  <div class="day-metric-bar-fill" id="day-progress-fill-${day.day}" style="width: 0%"></div>
+                  <div class="day-metric-bar-fill" id="day-progress-fill-${day.day}" style="width: ${dayPct}%"></div>
                 </div>
-                <span id="day-progress-text-${day.day}">0/${day.questions.length} (0%)</span>
+                <span id="day-progress-text-${day.day}">${daySolved}/${dayTotal} (${dayPct}%)</span>
               </div>
               <span class="chevron-arrow">▼</span>
             </div>
@@ -731,16 +772,16 @@
           <span class="motion-diff-pill ${diffClass}">${escapeHtml(q.difficulty)}</span>
         </td>
 
-        <td class="question-cell" style="width: 175px;">
+        <td class="question-cell" style="width: 185px;">
           <div class="status-toggle-group">
-            <button class="btn-mark btn-done ${qData.status === 'solved' ? 'active' : ''}" 
-                    onclick="window.sqlTracker.toggleDone('${q.id}')" 
+            <button type="button" class="btn-mark btn-done ${qData.status === 'solved' ? 'active' : ''}" 
+                    onclick="event.stopPropagation(); window.sqlTracker.toggleDone('${q.id}')" 
                     title="${qData.status === 'solved' ? 'Completed (Click to unmark)' : 'Mark as Done'}">
-              <span>${qData.status === 'solved' ? '✓' : '○'}</span>
+              <span class="btn-icon">${qData.status === 'solved' ? '✓' : '○'}</span>
               <span>Done</span>
             </button>
-            <button class="btn-mark btn-rev ${qData.status === 'revision' ? 'active' : ''}" 
-                    onclick="window.sqlTracker.toggleRevision('${q.id}')" 
+            <button type="button" class="btn-mark btn-rev ${qData.status === 'revision' ? 'active' : ''}" 
+                    onclick="event.stopPropagation(); window.sqlTracker.toggleRevision('${q.id}')" 
                     title="${qData.status === 'revision' ? 'In Revision Queue (Click to unmark)' : 'Mark for Revision'}">
               <span>🔁</span>
               <span>Revise</span>
@@ -754,7 +795,7 @@
               <span>Solve</span>
               <span aria-hidden="true">&rarr;</span>
             </a>
-            <button class="motion-btn-notes ${hasNotes ? 'has-notes' : ''}" onclick="window.sqlTracker.openNotes('${q.id}')" title="SQL Solution & Notes">
+            <button type="button" class="motion-btn-notes ${hasNotes ? 'has-notes' : ''}" onclick="event.stopPropagation(); window.sqlTracker.openNotes('${q.id}')" title="SQL Solution & Notes">
               Notes
             </button>
           </div>
@@ -859,6 +900,31 @@
   // =========================================================================
   // Question Status & Notes Actions
   // =========================================================================
+  function updateRowDOM(qId, status) {
+    const row = document.getElementById(`row-${qId}`);
+    if (!row) return false;
+
+    row.className = `question-row status-${status}`;
+    const btnDone = row.querySelector('.btn-done');
+    const btnRev = row.querySelector('.btn-rev');
+
+    if (btnDone) {
+      const isDone = status === 'solved';
+      btnDone.classList.toggle('active', isDone);
+      const icon = btnDone.querySelector('.btn-icon');
+      if (icon) icon.textContent = isDone ? '✓' : '○';
+      btnDone.title = isDone ? 'Completed (Click to unmark)' : 'Mark as Done';
+    }
+
+    if (btnRev) {
+      const isRev = status === 'revision';
+      btnRev.classList.toggle('active', isRev);
+      btnRev.title = isRev ? 'In Revision Queue (Click to unmark)' : 'Mark for Revision';
+    }
+
+    return true;
+  }
+
   function updateStatus(qId, newStatus) {
     if (!state.progress[qId]) {
       state.progress[qId] = getQuestionData(qId);
@@ -867,17 +933,29 @@
 
     if (newStatus === 'solved') {
       state.progress[qId].solvedAt = new Date().toISOString();
-      showToast('Question marked solved! 🎉', 'success');
+      showToast('Marked as Done! 🎉', 'success');
     } else if (newStatus === 'revision') {
       state.progress[qId].markedDate = new Date().toISOString();
-      showToast('Added to spaced recall queue (3-4 days) 🔁', 'warn');
+      showToast('Added to Revision Queue 🔁', 'warn');
     } else if (newStatus === 'notstarted') {
       showToast('Status reset to unsolved', 'info');
     }
 
     saveLocalState();
     syncQuestionToAPI(qId);
-    renderMain();
+
+    const rowUpdated = updateRowDOM(qId, newStatus);
+    const allQ = getAllQuestions();
+    const targetQ = allQ.find(q => q.id === qId);
+    if (targetQ) {
+      updateDayProgressDOM(targetQ.dayNum);
+    }
+    updateAllMetrics();
+
+    // If on revision tab or a status filter is filtering this row out, re-render
+    if (state.activeTab === 'revision' || (state.filters.status && state.filters.status !== 'all') || !rowUpdated) {
+      renderMain();
+    }
   }
 
   function toggleDone(qId) {
@@ -981,6 +1059,19 @@
     renderMain();
   }
 
+  function setStatusFilter(val) {
+    state.filters.status = val;
+    document.querySelectorAll('.filter-status-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-val') === val);
+    });
+    renderMain();
+  }
+
+  function setFilter(type, val) {
+    state.filters[type] = val;
+    renderMain();
+  }
+
   function resetFilters() {
     state.filters = {
       search: '',
@@ -991,9 +1082,17 @@
     };
     const searchInput = document.getElementById('global-search-input');
     if (searchInput) searchInput.value = '';
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    const phaseSelect = document.getElementById('phase-filter-select');
+    if (phaseSelect) phaseSelect.value = 'all';
+    const platSelect = document.getElementById('platform-filter-select');
+    if (platSelect) platSelect.value = 'all';
+    const diffSelect = document.getElementById('diff-filter-select');
+    if (diffSelect) diffSelect.value = 'all';
+    document.querySelectorAll('.filter-status-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-val') === 'all');
+    });
     renderMain();
-    showToast('Filters reset', 'info');
+    showToast('Filters cleared', 'info');
   }
 
   // =========================================================================
@@ -1086,12 +1185,15 @@
 
   // Global Tracker API
   window.sqlTracker = {
+    toggleTheme,
     toggleDay,
     expandAllDays,
     collapseAllDays,
     updateStatus,
     toggleDone,
     toggleRevision,
+    setStatusFilter,
+    setFilter,
     openNotes,
     closeNotes,
     saveCurrentNotes,
@@ -1107,6 +1209,9 @@
     submitAuth,
     logout
   };
+
+  // Run theme immediately
+  initTheme();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
