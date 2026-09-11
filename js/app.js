@@ -892,7 +892,7 @@
   }
 
   // =========================================================================
-  // Match Song Vibe with Monis (Music Player Engine)
+  // Study Beats with Monis (Music Player Engine)
   // =========================================================================
   const VIBE_PLAYLIST = [
     {
@@ -1242,14 +1242,14 @@
         <!-- Header Section -->
         <div class="vibe-hero-header">
           <div class="hero-meta-kicker">
-            <span>SONG VIBE LOUNGE</span>
+            <span>STUDY BEATS LOUNGE</span>
             <span class="bullet">&bull;</span>
             <span>7 CURATED TRACKS</span>
             <span class="bullet">&bull;</span>
             <span>DEEP CODING FLOW</span>
           </div>
           <h2 class="vibe-main-title">
-            <em>Match Song Vibe</em> with Monis 🎧
+            <em>Study Beats</em> with Monis 🎧
           </h2>
           <p class="vibe-main-desc">
             Handpicked playlist to get locked in while grinding your 20-Day SQL practice sheet.
@@ -1331,7 +1331,7 @@
           <div class="vibe-playlist-card">
             <div class="playlist-card-header">
               <div>
-                <h4 class="playlist-header-title">Match Song Vibe Tracklist</h4>
+                <h4 class="playlist-header-title">Study Beats Tracklist</h4>
                 <p class="playlist-header-sub">Click any track to switch song immediately</p>
               </div>
               <span class="playlist-badge-count">7 Tracks</span>
@@ -1735,7 +1735,7 @@
     switchAuthMode,
     submitAuth,
     logout,
-    // Match Song Vibe with Monis APIs
+    // Study Beats with Monis APIs
     playVibeSong,
     toggleVibePlay,
     nextVibeSong,

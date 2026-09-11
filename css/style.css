@@ -23,11 +23,11 @@
   --foreground-muted: #9499a3;
   --foreground-feint: #5a606d;
 
-  /* Motion Signature Yellow / Amber Accent */
-  --accent: #ffd60a;
-  --accent-foreground: #000000;
-  --accent-feint: rgba(255, 214, 10, 0.12);
-  --accent-border: rgba(255, 214, 10, 0.35);
+  /* Emerald Green Accent (Eye-Friendly across Dark & Light) */
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
+  --accent-feint: rgba(16, 185, 129, 0.14);
+  --accent-border: rgba(16, 185, 129, 0.4);
 
   /* Secondary Accents */
   --color-blue: #38bdf8;
@@ -153,7 +153,7 @@ header.motion-nav {
   width: 28px;
   height: 28px;
   background: var(--accent);
-  color: #000;
+  color: #ffffff;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -2102,7 +2102,7 @@ div[class*="netlify-identity"] {
 }
 
 /* ==========================================================================
-   Match Song Vibe with Monis — Music Lounge & Persistent Player
+   Study Beats with Monis — Music Lounge & Persistent Player
    ========================================================================== */
 
 /* Header Mini Vibe Controller */
@@ -2347,7 +2347,7 @@ div[class*="netlify-identity"] {
   color: var(--accent);
 }
 
-/* Dedicated Match Song Vibe View */
+/* Dedicated Study Beats View */
 .vibe-view-container {
   display: flex;
   flex-direction: column;
