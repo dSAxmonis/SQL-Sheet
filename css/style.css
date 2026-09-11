@@ -496,7 +496,7 @@ header.motion-nav {
    ========================================================================== */
 .fresh-rule-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   margin: 24px 0;
@@ -1141,6 +1141,14 @@ header.motion-nav {
 
 .question-row:hover {
   background: var(--surface-hover);
+}
+
+.question-row.status-solved {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.question-row.status-revision {
+  background: rgba(244, 63, 94, 0.05);
 }
 
 .question-cell {
@@ -1804,10 +1812,14 @@ div[class*="netlify-identity"] {
 /* Responsive */
 @media (max-width: 1024px) {
   .fresh-rule-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
-  .fresh-rule-col:nth-child(3) {
+  .fresh-rule-col:nth-child(2) {
     border-right: none;
+  }
+  .fresh-rule-col:nth-child(1),
+  .fresh-rule-col:nth-child(2) {
+    border-bottom: 1px solid var(--border);
   }
 }
 

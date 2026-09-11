@@ -28,11 +28,15 @@
         </div>
       </a>
 
-      <!-- Center Tabs: Roadmap, Focus Timer, Study Beats -->
+      <!-- Center Tabs: Roadmap, Revision, Focus Timer, Study Beats -->
       <nav class="motion-nav-center">
         <button class="motion-tab-pill active tab-btn" data-tab="sheet">
           <span>Roadmap</span>
           <span class="pill-counter">20 Days</span>
+        </button>
+        <button class="motion-tab-pill tab-btn" data-tab="revision" id="tab-revision-btn" title="Spaced Repetition Revision Queue">
+          <span>🔁 Revision</span>
+          <span class="pill-counter" id="tab-revision-count">0</span>
         </button>
         <button class="motion-tab-pill tab-btn" data-tab="timer">
           <span>⏱ Focus Timer</span>
@@ -95,6 +99,9 @@
           <span>Start Practice</span>
           <span aria-hidden="true">&darr;</span>
         </a>
+        <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('revision')">
+          <span>🔁 Revision Queue</span>
+        </button>
         <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('timer')">
           <span>⏱ Launch Focus Timer</span>
         </button>
@@ -142,7 +149,17 @@
         <div class="fresh-rule-desc">Marked as solved ✓</div>
       </div>
 
-      <!-- Col 3: Remaining & Difficulty -->
+      <!-- Col 3: Revision Queue -->
+      <div class="fresh-rule-col" style="cursor: pointer;" onclick="window.sqlTracker.setStatusFilter('revision')" title="Click to filter Revision problems">
+        <div class="fresh-rule-kicker">
+          <span>Revision Queue</span>
+          <span>3-4 DAYS</span>
+        </div>
+        <div class="fresh-rule-val val-rose" id="stat-revision">0</div>
+        <div class="fresh-rule-desc">Marked for review 🔁</div>
+      </div>
+
+      <!-- Col 4: Remaining & Difficulty -->
       <div class="fresh-rule-col">
         <div class="fresh-rule-kicker">
           <span>Remaining</span>
@@ -188,6 +205,7 @@
           <span class="filter-label">STATUS:</span>
           <button type="button" class="filter-status-btn active" data-val="all" onclick="window.sqlTracker.setStatusFilter('all')">All</button>
           <button type="button" class="filter-status-btn" data-val="solved" onclick="window.sqlTracker.setStatusFilter('solved')">✓ Done</button>
+          <button type="button" class="filter-status-btn" data-val="revision" onclick="window.sqlTracker.setStatusFilter('revision')">🔁 Revision</button>
           <button type="button" class="filter-status-btn" data-val="notstarted" onclick="window.sqlTracker.setStatusFilter('notstarted')">○ Unsolved</button>
         </div>
 
