@@ -1475,9 +1475,16 @@ header.motion-nav {
 }
 
 .motion-btn-notes.has-notes {
-  color: var(--accent);
-  border-color: var(--accent-border);
-  background: var(--accent-feint);
+  color: var(--color-green);
+  border-color: rgba(16, 185, 129, 0.45);
+  background: var(--color-green-feint);
+  font-weight: 500;
+}
+
+.motion-btn-notes.has-notes:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: var(--color-green);
+  color: #34d399;
 }
 
 /* ==========================================================================
@@ -2181,6 +2188,19 @@ div[class*="netlify-identity"] {
 [data-theme="light"] .motion-btn-notes:hover {
   background: #f1f5f9;
   color: #0f172a;
+}
+
+[data-theme="light"] .motion-btn-notes.has-notes {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #047857;
+  font-weight: 600;
+}
+
+[data-theme="light"] .motion-btn-notes.has-notes:hover {
+  background: #d1fae5;
+  border-color: #059669;
+  color: #065f46;
 }
 
 [data-theme="light"] .modal-palette {

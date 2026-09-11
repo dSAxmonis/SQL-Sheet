@@ -866,7 +866,7 @@
     const qData = getQuestionData(q.id);
     const platformClass = `platform-${q.platform.toLowerCase()}`;
     const diffClass = `diff-${q.difficulty.toLowerCase()}`;
-    const hasNotes = Boolean(qData.notes || qData.code);
+    const hasNotes = Boolean((qData.notes && qData.notes.trim()) || (qData.code && qData.code.trim()));
     const numPadded = String(q.num).padStart(2, '0');
 
     return `
@@ -971,6 +971,7 @@
                       dueBadge = `<span class="motion-diff-pill diff-medium" style="margin-left: 8px;">RE-ATTEMPT IN ${3 - daysAgo}d</span>`;
                     }
                   }
+                  const hasNotes = Boolean((qData.notes && qData.notes.trim()) || (qData.code && qData.code.trim()));
                   return `
                     <tr class="question-row status-revision">
                       <td class="question-cell cell-index">
@@ -999,7 +1000,7 @@
                       <td class="question-cell">
                         <div class="row-actions-wrap">
                           <a href="${escapeHtml(q.url)}" target="_blank" rel="noopener noreferrer" class="motion-btn-solve">Solve Again &rarr;</a>
-                          <button class="motion-btn-notes ${qData.notes || qData.code ? 'has-notes' : ''}" onclick="window.sqlTracker.openNotes('${q.id}')">Notes</button>
+                          <button class="motion-btn-notes ${hasNotes ? 'has-notes' : ''}" onclick="window.sqlTracker.openNotes('${q.id}')" title="${hasNotes ? 'View Saved SQL Solution & Notes' : 'SQL Solution & Notes'}">Notes</button>
                         </div>
                       </td>
                     </tr>
