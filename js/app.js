@@ -263,22 +263,19 @@
     clearAuthError();
     const titleEl = document.getElementById('auth-modal-title');
     const submitBtn = document.getElementById('auth-submit-btn');
-    const inviteGroup = document.getElementById('auth-invite-group');
     const displayGroup = document.getElementById('auth-displayname-group');
     const tabLogin = document.getElementById('auth-tab-login');
     const tabRegister = document.getElementById('auth-tab-register');
 
     if (mode === 'register') {
-      if (titleEl) titleEl.textContent = 'Create Study Partner Account';
+      if (titleEl) titleEl.textContent = 'Create Practice Account';
       if (submitBtn) submitBtn.innerHTML = '<span>Create Account</span> &rarr;';
-      if (inviteGroup) inviteGroup.style.display = 'block';
       if (displayGroup) displayGroup.style.display = 'block';
       if (tabRegister) tabRegister.classList.add('active');
       if (tabLogin) tabLogin.classList.remove('active');
     } else {
       if (titleEl) titleEl.textContent = 'Sign In to Tracker';
       if (submitBtn) submitBtn.innerHTML = '<span>Sign In</span> &rarr;';
-      if (inviteGroup) inviteGroup.style.display = 'none';
       if (displayGroup) displayGroup.style.display = 'none';
       if (tabLogin) tabLogin.classList.add('active');
       if (tabRegister) tabRegister.classList.remove('active');
@@ -302,12 +299,10 @@
     const usernameInput = document.getElementById('auth-username');
     const passwordInput = document.getElementById('auth-password');
     const displayInput = document.getElementById('auth-displayname');
-    const inviteInput = document.getElementById('auth-invite');
 
     const username = usernameInput ? usernameInput.value.trim() : '';
     const password = passwordInput ? passwordInput.value : '';
     const displayName = displayInput ? displayInput.value.trim() : '';
-    const inviteCode = inviteInput ? inviteInput.value.trim() : '';
 
     if (!username || !password) {
       showAuthError('Please enter username and password');
@@ -316,7 +311,7 @@
 
     const endpoint = state.authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
     const body = state.authMode === 'register'
-      ? { username, password, displayName, inviteCode }
+      ? { username, password, displayName }
       : { username, password };
 
     try {
