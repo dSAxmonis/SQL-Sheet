@@ -28,7 +28,7 @@
         </div>
       </a>
 
-      <!-- Center Tabs: Roadmap, Focus Timer, Spaced Repetition -->
+      <!-- Center Tabs: Roadmap, Focus Timer, Spaced Repetition, Match Song Vibe -->
       <nav class="motion-nav-center">
         <button class="motion-tab-pill active tab-btn" data-tab="sheet">
           <span>Roadmap</span>
@@ -41,9 +41,15 @@
           <span>Spaced Repetition</span>
           <span class="pill-counter" id="tab-revision-count">0</span>
         </button>
+        <button class="motion-tab-pill tab-btn" data-tab="vibe" id="tab-vibe-btn" title="Match Song Vibe with Monis">
+          <span>🎧 Match Song Vibe</span>
+          <span class="vibe-nav-wave" id="nav-vibe-wave" style="display: none;">
+            <span></span><span></span><span></span>
+          </span>
+        </button>
       </nav>
 
-      <!-- Right Tools: Mini Sync Timer & User Auth (Export/Import/Reset removed per user request) -->
+      <!-- Right Tools: Mini Sync Timer, Mini Vibe Player & User Auth -->
       <div class="motion-nav-actions">
         
         <!-- Header Mini Timer (Click to switch to Focus Timer tab) -->
@@ -51,6 +57,16 @@
           <span style="font-family: var(--font-mono); font-size: 11px; color: var(--foreground-feint);">TIMER</span>
           <div class="motion-timer-display" id="header-mini-timer-time">15:00</div>
           <button class="timer-btn" id="header-timer-toggle-btn" onclick="event.stopPropagation(); window.sqlTracker.toggleTimer();" title="Start / Pause">▶</button>
+        </div>
+
+        <!-- Header Mini Vibe Controller -->
+        <div class="motion-vibe-box" id="header-vibe-box" onclick="window.sqlTracker.switchTab('vibe')" title="Match Song Vibe with Monis">
+          <span class="vibe-icon-note">🎵</span>
+          <div class="vibe-mini-info">
+            <span class="vibe-mini-label">VIBE</span>
+            <span class="vibe-mini-song" id="header-vibe-song-title">Off</span>
+          </div>
+          <button class="timer-btn" id="header-vibe-toggle-btn" onclick="event.stopPropagation(); window.sqlTracker.toggleVibePlay();" title="Play / Pause Vibe">▶</button>
         </div>
 
         <!-- Theme Switcher (White / Dark) -->
@@ -107,6 +123,9 @@
         </button>
         <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('revision')">
           <span>🔁 Spaced Repetition Queue</span>
+        </button>
+        <button class="btn-secondary-action btn-hero-vibe" onclick="window.sqlTracker.switchTab('vibe')">
+          <span>🎵 Match Song Vibe with Monis</span>
         </button>
       </div>
     </section>
@@ -377,6 +396,37 @@ SELECT ..."></textarea>
       </div>
     </div>
   </footer>
+
+  <!-- Hidden Persistent Audio Element -->
+  <audio id="vibe-audio-element" preload="metadata"></audio>
+
+  <!-- Persistent Floating Vibe Mini Dock -->
+  <div id="vibe-floating-dock" class="vibe-floating-dock" style="display: none;">
+    <div class="floating-dock-left" onclick="window.sqlTracker.switchTab('vibe')" title="Open Match Song Vibe with Monis">
+      <div class="dock-vinyl-icon" id="dock-vinyl-icon">
+        <div class="dock-vinyl-groove"></div>
+        <div class="dock-vinyl-center"></div>
+      </div>
+      <div class="dock-meta">
+        <div class="dock-tag">Match Song Vibe with Monis 🎧</div>
+        <div class="dock-title" id="dock-song-title">Stan (Long Version)</div>
+      </div>
+    </div>
+    
+    <div class="dock-controls">
+      <button class="dock-btn" onclick="window.sqlTracker.prevVibeSong()" title="Previous Track">⏮</button>
+      <button class="dock-btn dock-btn-play" id="dock-play-btn" onclick="window.sqlTracker.toggleVibePlay()" title="Play / Pause">▶</button>
+      <button class="dock-btn" onclick="window.sqlTracker.nextVibeSong()" title="Next Track">⏭</button>
+      
+      <!-- Loop Switcher Pill -->
+      <button class="dock-loop-pill" id="dock-loop-btn" onclick="window.sqlTracker.toggleVibeLoopMode()" title="Toggle Loop Mode (Loop All / Loop One)">
+        <span id="dock-loop-icon">🔁</span>
+        <span id="dock-loop-text">Loop All</span>
+      </button>
+
+      <button class="dock-btn dock-btn-close" onclick="window.sqlTracker.hideFloatingDock()" title="Hide Mini Player">✕</button>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="js/data.js"></script>
