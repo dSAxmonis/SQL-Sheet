@@ -1190,31 +1190,61 @@
       .replace(/'/g, '&#039;');
   }
 
-  // Funny SQL Jokes Generator
+  // Funny SQL Jokes & Interactive ASCII Cat Expressions
+  const CAT_FACES = [
+    "  /\\_/\\  \n ( • . • ) \n  /  > ☕",
+    "  /\\_/\\  \n ( ^ . ^ ) \n  /  > ✨",
+    "  /\\_/\\  \n ( ˶• ֊ •˶)\n  /  > 🍕",
+    "  /\\_/\\  \n ( ✧_✧ ) \n  /  > 🚀",
+    "  /\\_/\\  \n ( ᵔ ᵕ ᵔ ) \n  /  > 💡",
+    "  /\\_/\\  \n ( > ᴗ < ) \n  /  > 🍪",
+    "  /\\_/\\  \n ( •_• ) \n  /  > 🛡️",
+    "  /\\_/\\  \n ( ⚆ _ ⚆ )\n  /  > 💥"
+  ];
+
   const SQL_JOKES = [
     'A SQL query walks into a bar, walks up to two tables and asks: "Can I join you?" 🍺',
     'SELECT * FROM developers WHERE coffee_cups > 3 AND hours_slept < 4; -- 1,000,000 rows returned ☕',
-    'There are 10 types of people: those who understand binary, those who don\'t, and those who forgot the WHERE clause and updated production. 💥',
-    'SELECT sanity FROM brain WHERE deadline = "tomorrow"; -- ERROR: 0 rows returned 🧠',
-    'Optimist: The glass is half full. Pessimist: The glass is half empty. SQL Dev: The glass is NOT NULL. 🥛',
-    'Why did the database administrator leave? She had one-to-many relationships. 💔',
+    'Why did the developer break up with SQL? Too many one-to-many relationships and zero commits. 💔',
+    'Optimist: Glass half full. Pessimist: Glass half empty. SQL Dev: "The glass is NOT NULL." 🥛',
+    'There are 10 types of people: those who understand binary, and those who forgot the WHERE clause and wiped production. 💥',
+    'SELECT sanity FROM brain WHERE interview_date = "tomorrow"; -- ERROR: Out of memory 🧠',
     'Don\'t worry, your O(N!) query runs in O(1) if you just kill the database server. ⚡',
+    'Never DROP TABLE on a Friday. Monday is for panic, Friday is for pizza. 🍕',
+    'Why do programmers hate nature? It has too many bugs and no stack trace. 🐛',
+    'SELECT * FROM life WHERE coffee > 0 AND bugs = 0; -- Query timed out ⏳',
     'May all your JOINs be INNER and your queries index-scanned! 🚀'
   ];
 
-  function nextSqlJoke() {
+  let currentJokeIdx = 0;
+  let currentFaceIdx = 0;
+
+  function pokeCatJoke() {
     const jokeEl = document.getElementById('footer-joke-text');
-    if (!jokeEl) return;
-    const current = parseInt(jokeEl.getAttribute('data-joke-idx') || '0', 10);
-    const next = (current + 1) % SQL_JOKES.length;
-    jokeEl.setAttribute('data-joke-idx', next);
-    jokeEl.style.opacity = '0';
-    jokeEl.style.transform = 'translateY(4px)';
-    setTimeout(() => {
-      jokeEl.textContent = SQL_JOKES[next];
-      jokeEl.style.opacity = '1';
-      jokeEl.style.transform = 'translateY(0)';
-    }, 120);
+    const catEl = document.getElementById('cat-ascii-display');
+
+    currentJokeIdx = (currentJokeIdx + 1) % SQL_JOKES.length;
+    currentFaceIdx = (currentFaceIdx + 1) % CAT_FACES.length;
+
+    if (catEl) {
+      catEl.textContent = CAT_FACES[currentFaceIdx];
+      catEl.style.transform = 'scale(1.12) translateY(-2px)';
+      catEl.style.transition = 'transform 0.15s ease';
+      setTimeout(() => {
+        catEl.style.transform = 'scale(1) translateY(0)';
+      }, 160);
+    }
+
+    if (jokeEl) {
+      jokeEl.style.opacity = '0';
+      jokeEl.style.transform = 'translateY(4px)';
+      jokeEl.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+      setTimeout(() => {
+        jokeEl.textContent = SQL_JOKES[currentJokeIdx];
+        jokeEl.style.opacity = '1';
+        jokeEl.style.transform = 'translateY(0)';
+      }, 140);
+    }
   }
 
   // Global Tracker API
@@ -1228,7 +1258,8 @@
     toggleRevision,
     setStatusFilter,
     setFilter,
-    nextSqlJoke,
+    nextSqlJoke: pokeCatJoke,
+    pokeCatJoke,
     openNotes,
     closeNotes,
     saveCurrentNotes,
