@@ -196,7 +196,7 @@
     if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
     if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
     if (showToastMsg) {
-      showToast(`Switched to ${theme === 'light' ? 'White / Light' : 'Carbon Dark'} theme`, 'info');
+      showToast(`Switched to ${theme === 'light' ? 'Classic Moon' : 'Carbon Dark'} theme`, 'info');
     }
   }
 
