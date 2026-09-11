@@ -1190,6 +1190,33 @@
       .replace(/'/g, '&#039;');
   }
 
+  // Funny SQL Jokes Generator
+  const SQL_JOKES = [
+    'A SQL query walks into a bar, walks up to two tables and asks: "Can I join you?" 🍺',
+    'SELECT * FROM developers WHERE coffee_cups > 3 AND hours_slept < 4; -- 1,000,000 rows returned ☕',
+    'There are 10 types of people: those who understand binary, those who don\'t, and those who forgot the WHERE clause and updated production. 💥',
+    'SELECT sanity FROM brain WHERE deadline = "tomorrow"; -- ERROR: 0 rows returned 🧠',
+    'Optimist: The glass is half full. Pessimist: The glass is half empty. SQL Dev: The glass is NOT NULL. 🥛',
+    'Why did the database administrator leave? She had one-to-many relationships. 💔',
+    'Don\'t worry, your O(N!) query runs in O(1) if you just kill the database server. ⚡',
+    'May all your JOINs be INNER and your queries index-scanned! 🚀'
+  ];
+
+  function nextSqlJoke() {
+    const jokeEl = document.getElementById('footer-joke-text');
+    if (!jokeEl) return;
+    const current = parseInt(jokeEl.getAttribute('data-joke-idx') || '0', 10);
+    const next = (current + 1) % SQL_JOKES.length;
+    jokeEl.setAttribute('data-joke-idx', next);
+    jokeEl.style.opacity = '0';
+    jokeEl.style.transform = 'translateY(4px)';
+    setTimeout(() => {
+      jokeEl.textContent = SQL_JOKES[next];
+      jokeEl.style.opacity = '1';
+      jokeEl.style.transform = 'translateY(0)';
+    }, 120);
+  }
+
   // Global Tracker API
   window.sqlTracker = {
     toggleTheme,
@@ -1201,6 +1228,7 @@
     toggleRevision,
     setStatusFilter,
     setFilter,
+    nextSqlJoke,
     openNotes,
     closeNotes,
     saveCurrentNotes,
