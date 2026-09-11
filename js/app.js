@@ -731,13 +731,21 @@
           <span class="motion-diff-pill ${diffClass}">${escapeHtml(q.difficulty)}</span>
         </td>
 
-        <td class="question-cell" style="width: 160px;">
-          <select class="motion-status-select ${qData.status}" onchange="window.sqlTracker.updateStatus('${q.id}', this.value)">
-            <option value="notstarted" ${qData.status === 'notstarted' ? 'selected' : ''}>Not Started</option>
-            <option value="inprogress" ${qData.status === 'inprogress' ? 'selected' : ''}>In Progress</option>
-            <option value="solved" ${qData.status === 'solved' ? 'selected' : ''}>Solved</option>
-            <option value="revision" ${qData.status === 'revision' ? 'selected' : ''}>Needs Revision</option>
-          </select>
+        <td class="question-cell" style="width: 175px;">
+          <div class="status-toggle-group">
+            <button class="btn-mark btn-done ${qData.status === 'solved' ? 'active' : ''}" 
+                    onclick="window.sqlTracker.toggleDone('${q.id}')" 
+                    title="${qData.status === 'solved' ? 'Completed (Click to unmark)' : 'Mark as Done'}">
+              <span>${qData.status === 'solved' ? '✓' : '○'}</span>
+              <span>Done</span>
+            </button>
+            <button class="btn-mark btn-rev ${qData.status === 'revision' ? 'active' : ''}" 
+                    onclick="window.sqlTracker.toggleRevision('${q.id}')" 
+                    title="${qData.status === 'revision' ? 'In Revision Queue (Click to unmark)' : 'Mark for Revision'}">
+              <span>🔁</span>
+              <span>Revise</span>
+            </button>
+          </div>
         </td>
 
         <td class="question-cell" style="width: 160px;">
@@ -783,7 +791,7 @@
           <p style="font-family: var(--font-mono); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-green); margin-bottom: 6px;">
             // REVISION QUEUE EMPTY
           </p>
-          <p style="font-size: 13px; color: var(--foreground-muted);">When you encounter a difficult query or need 15+ minutes to solve, select <strong>"Needs Revision"</strong> to track it here.</p>
+          <p style="font-size: 13px; color: var(--foreground-muted);">When you encounter a difficult query or need 15+ minutes to solve, click <strong>"Revise"</strong> to track it here.</p>
           <button class="btn-secondary-action" style="margin-top: 16px;" onclick="window.sqlTracker.switchTab('sheet')">Return to Roadmap &rarr;</button>
         </div>
       `;
@@ -817,13 +825,17 @@
                       </td>
                       <td class="question-cell"><span class="motion-platform-pill platform-${q.platform.toLowerCase()}">${escapeHtml(q.platform)}</span></td>
                       <td class="question-cell"><span class="motion-diff-pill diff-${q.difficulty.toLowerCase()}">${escapeHtml(q.difficulty)}</span></td>
-                      <td class="question-cell">
-                        <select class="motion-status-select revision" onchange="window.sqlTracker.updateStatus('${q.id}', this.value)">
-                          <option value="revision" selected>Needs Revision</option>
-                          <option value="solved">Solved Now</option>
-                          <option value="inprogress">In Progress</option>
-                          <option value="notstarted">Not Started</option>
-                        </select>
+                      <td class="question-cell" style="width: 175px;">
+                        <div class="status-toggle-group">
+                          <button class="btn-mark btn-done" onclick="window.sqlTracker.toggleDone('${q.id}')" title="Mark Solved">
+                            <span>✓</span>
+                            <span>Solved</span>
+                          </button>
+                          <button class="btn-mark btn-rev active" onclick="window.sqlTracker.toggleRevision('${q.id}')" title="Remove from Revision">
+                            <span>✕</span>
+                            <span>Remove</span>
+                          </button>
+                        </div>
                       </td>
                       <td class="question-cell">
                         <div class="row-actions-wrap">
@@ -859,11 +871,25 @@
     } else if (newStatus === 'revision') {
       state.progress[qId].markedDate = new Date().toISOString();
       showToast('Added to spaced recall queue (3-4 days) 🔁', 'warn');
+    } else if (newStatus === 'notstarted') {
+      showToast('Status reset to unsolved', 'info');
     }
 
     saveLocalState();
     syncQuestionToAPI(qId);
     renderMain();
+  }
+
+  function toggleDone(qId) {
+    const qData = getQuestionData(qId);
+    const newStatus = qData.status === 'solved' ? 'notstarted' : 'solved';
+    updateStatus(qId, newStatus);
+  }
+
+  function toggleRevision(qId) {
+    const qData = getQuestionData(qId);
+    const newStatus = qData.status === 'revision' ? 'notstarted' : 'revision';
+    updateStatus(qId, newStatus);
   }
 
   let currentEditingQId = null;
@@ -1064,6 +1090,8 @@
     expandAllDays,
     collapseAllDays,
     updateStatus,
+    toggleDone,
+    toggleRevision,
     openNotes,
     closeNotes,
     saveCurrentNotes,

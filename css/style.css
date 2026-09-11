@@ -1110,6 +1110,58 @@ header.motion-nav {
   border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
+.status-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-mark {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: var(--transition-fast);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-mark:hover {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+}
+
+.btn-mark.btn-done:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--color-green);
+}
+
+.btn-mark.btn-done.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-green);
+  border-color: var(--color-green);
+  font-weight: 600;
+}
+
+.btn-mark.btn-rev:hover {
+  border-color: rgba(244, 63, 94, 0.4);
+  color: var(--color-rose);
+}
+
+.btn-mark.btn-rev.active {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--color-rose);
+  border-color: var(--color-rose);
+  font-weight: 600;
+}
+
 .motion-diff-pill {
   font-family: var(--font-mono);
   font-size: 10px;
