@@ -22,7 +22,7 @@
     progress: {},       // { [qId]: { status, notes, code, timeSpent, markedDate, solvedAt } }
     openDays: [1],      // Default day 1 open
     revealedHints: new Set(), // Set of qIds with revealed hints
-    activeTab: 'sheet',  // 'sheet' | 'timer' | 'revision'
+    activeTab: 'sheet',  // 'sheet' | 'timer' | 'revision' | 'cheatsheet'
     filters: {
       search: '',
       phase: 'all',
@@ -241,7 +241,6 @@
     renderAuthBadge();
     setupEventListeners();
     updateTimerDisplays();
-    initVibePlayer();
     renderMain();
     updateAllMetrics();
     removeBottomRightPopups();
@@ -513,9 +512,9 @@
     } else if (state.activeTab === 'revision') {
       if (controlsSection) controlsSection.style.display = 'none';
       renderRevisionQueue(container);
-    } else if (state.activeTab === 'vibe') {
+    } else if (state.activeTab === 'cheatsheet') {
       if (controlsSection) controlsSection.style.display = 'none';
-      renderVibeSongView(container);
+      renderCheatSheetView(container);
     } else {
       if (controlsSection) controlsSection.style.display = 'flex';
       renderRoadmapSheet(container);
@@ -1021,479 +1020,76 @@
   }
 
   // =========================================================================
-  // Study Beats with Monis (Music Player Engine)
+  // DataLemur SQL Cheat Sheet View
   // =========================================================================
-  const VIBE_PLAYLIST = [
-    {
-      id: 'stan',
-      title: 'Stan (Long Version)',
-      artist: 'Eminem ft. Dido',
-      file: 'vibe song/Eminem - Stan (Long Version) ft. Dido.mp3',
-      duration: '6:44',
-      tag: 'Classic Hip-Hop • Focus'
-    },
-    {
-      id: 'after-dark',
-      title: 'After Dark',
-      artist: 'Mr.Kitty',
-      file: 'vibe song/Mr.Kitty - After Dark.mp3',
-      duration: '4:17',
-      tag: 'Synthwave • Night Coding'
-    },
-    {
-      id: 'kal-ho-naa-ho',
-      title: 'Kal Ho Naa Ho',
-      artist: 'Sonu Nigam • Shankar Ehsaan Loy',
-      file: 'vibe song/Kal Ho Naa Ho - Official Audio Song  Sonu Nigam  Shankar Ehsaan Loy  Javed Akhtar.mp3',
-      duration: '5:23',
-      tag: 'Soulful • Flow State'
-    },
-    {
-      id: 'sadgi',
-      title: 'Sadgi Tou Hamari Zara Dekhiye',
-      artist: 'Nusrat Fateh Ali Khan',
-      file: 'vibe song/Sadgi Tou Hamari Zara Dekhiye Nusrat Fateh Ali Khan.mp3',
-      duration: '15:10',
-      tag: 'Sufi Qawwali • Deep Trance'
-    },
-    {
-      id: 'l-theme',
-      title: 'L\'s Theme',
-      artist: 'Hideki Taniuchi (Death Note)',
-      file: 'vibe song/L no Theme.mp3',
-      duration: '3:04',
-      tag: 'Detective Mode • Intense SQL'
-    },
-    {
-      id: 'kyrie',
-      title: 'Kyrie',
-      artist: 'Yoshihisa Hirano (Death Note)',
-      file: 'vibe song/Kyrie.mp3',
-      duration: '2:21',
-      tag: 'Epic Choral • Mastermind'
-    },
-    {
-      id: 'mahiya-ve-soniya',
-      title: 'Mahiya Ve Soniya',
-      artist: 'Lo-Fi Chill Mix',
-      file: 'vibe song/Mahiya Ve Soniya.mp3',
-      duration: '4:39',
-      tag: 'Lo-Fi • Late Night Practice'
-    }
-  ];
-
-  const vibePlayer = {
-    audio: null,
-    currentIdx: 0,
-    isPlaying: false,
-    loopMode: 'all', // 'all' (Loop all songs in queue) or 'one' (Loop this one song)
-    volume: 0.8,
-    dockDismissed: false
-  };
-
-  function initVibePlayer() {
-    vibePlayer.audio = document.getElementById('vibe-audio-element');
-    if (!vibePlayer.audio) return;
-
-    try {
-      const savedLoop = localStorage.getItem('sql_vibe_loop');
-      if (savedLoop === 'one' || savedLoop === 'all') vibePlayer.loopMode = savedLoop;
-      const savedVol = localStorage.getItem('sql_vibe_vol');
-      if (savedVol !== null) vibePlayer.volume = parseFloat(savedVol) || 0.8;
-      const savedIdx = localStorage.getItem('sql_vibe_idx');
-      if (savedIdx !== null) vibePlayer.currentIdx = parseInt(savedIdx, 10) || 0;
-    } catch (e) {}
-
-    vibePlayer.audio.volume = vibePlayer.volume;
-
-    const initialSong = VIBE_PLAYLIST[vibePlayer.currentIdx] || VIBE_PLAYLIST[0];
-    if (initialSong) {
-      vibePlayer.audio.src = encodeURI(initialSong.file);
-    }
-
-    vibePlayer.audio.addEventListener('play', () => {
-      vibePlayer.isPlaying = true;
-      vibePlayer.dockDismissed = false;
-      updateVibeUI();
-    });
-
-    vibePlayer.audio.addEventListener('pause', () => {
-      vibePlayer.isPlaying = false;
-      updateVibeUI();
-    });
-
-    vibePlayer.audio.addEventListener('timeupdate', () => {
-      updateVibeProgressUI();
-    });
-
-    vibePlayer.audio.addEventListener('ended', () => {
-      if (vibePlayer.loopMode === 'one') {
-        vibePlayer.audio.currentTime = 0;
-        vibePlayer.audio.play().catch(() => {});
-        showToast(`Looping: ${VIBE_PLAYLIST[vibePlayer.currentIdx].title} 🔂`, 'info');
-      } else {
-        nextVibeSong(true);
-      }
-    });
-
-    vibePlayer.audio.addEventListener('error', (e) => {
-      console.warn('Vibe audio event error:', e);
-      vibePlayer.isPlaying = false;
-      updateVibeUI();
-    });
-
-    updateVibeUI();
-  }
-
-  function playVibeSong(idx) {
-    if (idx < 0 || idx >= VIBE_PLAYLIST.length) return;
-    vibePlayer.currentIdx = idx;
-    try { localStorage.setItem('sql_vibe_idx', idx); } catch (e) {}
-
-    const song = VIBE_PLAYLIST[idx];
-    if (!vibePlayer.audio) vibePlayer.audio = document.getElementById('vibe-audio-element');
-    if (!vibePlayer.audio) return;
-
-    vibePlayer.audio.src = encodeURI(song.file);
-    vibePlayer.audio.play().then(() => {
-      vibePlayer.isPlaying = true;
-      vibePlayer.dockDismissed = false;
-      updateVibeUI();
-      showToast(`Now Playing: ${song.title} 🎵`, 'success');
-    }).catch(err => {
-      console.log('Playback error / user gesture needed:', err);
-      updateVibeUI();
-    });
-  }
-
-  function toggleVibePlay() {
-    if (!vibePlayer.audio) vibePlayer.audio = document.getElementById('vibe-audio-element');
-    if (!vibePlayer.audio) return;
-
-    if (vibePlayer.isPlaying) {
-      vibePlayer.audio.pause();
-    } else {
-      if (!vibePlayer.audio.src || vibePlayer.audio.src.endsWith('/')) {
-        playVibeSong(vibePlayer.currentIdx);
-      } else {
-        vibePlayer.audio.play().then(() => {
-          vibePlayer.isPlaying = true;
-          vibePlayer.dockDismissed = false;
-          updateVibeUI();
-        }).catch(() => {
-          playVibeSong(vibePlayer.currentIdx);
-        });
-      }
-    }
-  }
-
-  function nextVibeSong(isAuto = false) {
-    const next = (vibePlayer.currentIdx + 1) % VIBE_PLAYLIST.length;
-    playVibeSong(next);
-  }
-
-  function prevVibeSong() {
-    if (vibePlayer.audio && vibePlayer.audio.currentTime > 3) {
-      vibePlayer.audio.currentTime = 0;
-      return;
-    }
-    const prev = (vibePlayer.currentIdx - 1 + VIBE_PLAYLIST.length) % VIBE_PLAYLIST.length;
-    playVibeSong(prev);
-  }
-
-  function setVibeLoopMode(mode) {
-    vibePlayer.loopMode = mode;
-    try { localStorage.setItem('sql_vibe_loop', mode); } catch (e) {}
-    updateVibeUI();
-    if (mode === 'one') {
-      showToast('Loop Mode: Single Song (🔂 Infinite Loop)', 'info');
-    } else {
-      showToast('Loop Mode: All Songs in Queue (🔁 Playlist Loop)', 'info');
-    }
-  }
-
-  function toggleVibeLoopMode() {
-    const newMode = vibePlayer.loopMode === 'all' ? 'one' : 'all';
-    setVibeLoopMode(newMode);
-  }
-
-  function seekVibe(e) {
-    if (!vibePlayer.audio || !vibePlayer.audio.duration) return;
-    const bar = e.currentTarget;
-    const rect = bar.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percent = Math.max(0, Math.min(1, clickX / rect.width));
-    vibePlayer.audio.currentTime = percent * vibePlayer.audio.duration;
-  }
-
-  function setVibeVolume(val) {
-    vibePlayer.volume = parseFloat(val);
-    if (vibePlayer.audio) {
-      vibePlayer.audio.volume = vibePlayer.volume;
-      vibePlayer.audio.muted = (vibePlayer.volume === 0);
-    }
-    try { localStorage.setItem('sql_vibe_vol', vibePlayer.volume); } catch (e) {}
-    updateVibeUI();
-  }
-
-  function hideFloatingDock() {
-    vibePlayer.dockDismissed = true;
-    const dock = document.getElementById('vibe-floating-dock');
-    if (dock) dock.style.display = 'none';
-  }
-
-  function updateVibeUI() {
-    const currentSong = VIBE_PLAYLIST[vibePlayer.currentIdx] || VIBE_PLAYLIST[0];
-
-    // Header Mini Box
-    const headerTitle = document.getElementById('header-vibe-song-title');
-    const headerBtn = document.getElementById('header-vibe-toggle-btn');
-    const navWave = document.getElementById('nav-vibe-wave');
-    if (headerTitle) {
-      headerTitle.textContent = vibePlayer.isPlaying ? currentSong.title : 'Off';
-    }
-    if (headerBtn) {
-      headerBtn.textContent = vibePlayer.isPlaying ? '⏸' : '▶';
-    }
-    if (navWave) {
-      navWave.style.display = vibePlayer.isPlaying ? 'inline-flex' : 'none';
-    }
-
-    // Floating Dock
-    const dock = document.getElementById('vibe-floating-dock');
-    const dockTitle = document.getElementById('dock-song-title');
-    const dockPlayBtn = document.getElementById('dock-play-btn');
-    const dockLoopIcon = document.getElementById('dock-loop-icon');
-    const dockLoopText = document.getElementById('dock-loop-text');
-    const dockLoopBtn = document.getElementById('dock-loop-btn');
-    const dockVinyl = document.getElementById('dock-vinyl-icon');
-
-    if (dock) {
-      if (!vibePlayer.dockDismissed && (vibePlayer.isPlaying || (vibePlayer.audio && vibePlayer.audio.currentTime > 0))) {
-        dock.style.display = 'flex';
-      }
-    }
-    if (dockTitle) dockTitle.textContent = `${currentSong.title} — ${currentSong.artist}`;
-    if (dockPlayBtn) dockPlayBtn.textContent = vibePlayer.isPlaying ? '⏸' : '▶';
-    if (dockLoopIcon) dockLoopIcon.textContent = vibePlayer.loopMode === 'one' ? '🔂' : '🔁';
-    if (dockLoopText) dockLoopText.textContent = vibePlayer.loopMode === 'one' ? 'Loop One' : 'Loop All';
-    if (dockLoopBtn) {
-      dockLoopBtn.classList.toggle('active-one', vibePlayer.loopMode === 'one');
-      dockLoopBtn.classList.toggle('active-all', vibePlayer.loopMode === 'all');
-    }
-    if (dockVinyl) {
-      dockVinyl.classList.toggle('spinning', vibePlayer.isPlaying);
-    }
-
-    // Update Full Tab View if active
-    if (state.activeTab === 'vibe') {
-      const mainTitle = document.getElementById('vibe-main-song-title');
-      const mainArtist = document.getElementById('vibe-main-song-artist');
-      const mainTag = document.getElementById('vibe-main-song-tag');
-      const mainPlayBtn = document.getElementById('vibe-main-play-btn');
-      const mainVinyl = document.getElementById('vibe-main-vinyl');
-      const loopAllBtn = document.getElementById('vibe-loop-btn-all');
-      const loopOneBtn = document.getElementById('vibe-loop-btn-one');
-      const volModeBadge = document.getElementById('vibe-vol-mode-badge');
-
-      if (mainTitle) mainTitle.textContent = currentSong.title;
-      if (mainArtist) mainArtist.textContent = currentSong.artist;
-      if (mainTag) mainTag.textContent = currentSong.tag;
-      if (mainPlayBtn) mainPlayBtn.textContent = vibePlayer.isPlaying ? '⏸ Pause' : '▶ Play';
-      if (mainVinyl) mainVinyl.classList.toggle('spinning', vibePlayer.isPlaying);
-      if (volModeBadge) volModeBadge.textContent = vibePlayer.loopMode === 'one' ? '🔂 Single Repeat' : '🔁 All Repeat';
-
-      if (loopAllBtn) loopAllBtn.classList.toggle('active', vibePlayer.loopMode === 'all');
-      if (loopOneBtn) loopOneBtn.classList.toggle('active', vibePlayer.loopMode === 'one');
-
-      document.querySelectorAll('.vibe-track-row').forEach(row => {
-        const rowIdx = parseInt(row.getAttribute('data-song-idx'), 10);
-        const isActive = (rowIdx === vibePlayer.currentIdx);
-        row.classList.toggle('active-playing', isActive && vibePlayer.isPlaying);
-        row.classList.toggle('active-selected', isActive && !vibePlayer.isPlaying);
-        const playIcon = row.querySelector('.track-play-icon');
-        if (playIcon) {
-          playIcon.textContent = (isActive && vibePlayer.isPlaying) ? '⏸' : '▶';
-        }
-      });
-    }
-  }
-
-  function updateVibeProgressUI() {
-    if (!vibePlayer.audio) return;
-    const cur = vibePlayer.audio.currentTime || 0;
-    const dur = vibePlayer.audio.duration || 0;
-    const percent = dur > 0 ? (cur / dur) * 100 : 0;
-
-    const timeCurrent = document.getElementById('vibe-time-current');
-    const timeTotal = document.getElementById('vibe-time-total');
-    const progressFill = document.getElementById('vibe-progress-fill');
-
-    if (timeCurrent) timeCurrent.textContent = formatAudioTime(cur);
-    if (timeTotal && dur > 0) timeTotal.textContent = formatAudioTime(dur);
-    if (progressFill) progressFill.style.width = `${percent}%`;
-  }
-
-  function formatAudioTime(secs) {
-    if (isNaN(secs) || secs < 0) return '0:00';
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  }
-
-  function renderVibeSongView(container) {
-    const currentSong = VIBE_PLAYLIST[vibePlayer.currentIdx] || VIBE_PLAYLIST[0];
-
-    const trackRowsHtml = VIBE_PLAYLIST.map((song, idx) => {
-      const isCurrent = (idx === vibePlayer.currentIdx);
-      const isPlaying = isCurrent && vibePlayer.isPlaying;
-      return `
-        <tr class="vibe-track-row ${isPlaying ? 'active-playing' : ''} ${isCurrent && !isPlaying ? 'active-selected' : ''}" data-song-idx="${idx}" onclick="window.sqlTracker.playVibeSong(${idx})">
-          <td class="track-num-col">
-            <span class="track-index">${idx + 1}</span>
-            <span class="track-play-icon">${isPlaying ? '⏸' : '▶'}</span>
-          </td>
-          <td class="track-title-col">
-            <div class="track-title-text">${escapeHtml(song.title)}</div>
-            <div class="track-artist-sub">${escapeHtml(song.artist)}</div>
-          </td>
-          <td class="track-tag-col">
-            <span class="vibe-genre-badge">${escapeHtml(song.tag)}</span>
-          </td>
-          <td class="track-duration-col">${song.duration}</td>
-        </tr>
-      `;
-    }).join('');
-
+  function renderCheatSheetView(container) {
     container.innerHTML = `
-      <div class="vibe-view-container">
+      <div class="cheatsheet-view-container">
         
-        <!-- Header Section -->
-        <div class="vibe-hero-header">
-          <div class="hero-meta-kicker">
-            <span>STUDY BEATS LOUNGE</span>
-            <span class="bullet">&bull;</span>
-            <span>7 CURATED TRACKS</span>
-            <span class="bullet">&bull;</span>
-            <span>DEEP CODING FLOW</span>
-          </div>
-          <h2 class="vibe-main-title">
-            <em>Study Beats</em> with Monis 🎧
-          </h2>
-          <p class="vibe-main-desc">
-            Handpicked playlist to get locked in while grinding your 20-Day SQL practice sheet.
-            Choose whether to loop all songs in sequence or keep your favorite track on repeat!
-          </p>
-        </div>
-
-        <!-- Loop Mode Segmented Bar (Explicit requirement) -->
-        <div class="vibe-loop-selector-card">
-          <div class="loop-selector-info">
-            <span class="loop-badge-icon">${vibePlayer.loopMode === 'one' ? '🔂' : '🔁'}</span>
-            <div>
-              <div class="loop-selector-title">Playback Loop Mode</div>
-              <div class="loop-selector-sub">Choose how your playlist repeats while you study</div>
+        <!-- Hero Card -->
+        <div class="cheatsheet-hero-card">
+          <div class="cheatsheet-hero-left">
+            <div class="cheatsheet-meta-badge">
+              <span class="badge-dot"></span>
+              <span>INTERVIEW ESSENTIAL // DATALEMUR REFERENCE</span>
             </div>
+            <h2 class="cheatsheet-title">
+              DataLemur SQL Cheat Sheet 📄
+            </h2>
+            <p class="cheatsheet-desc">
+              High-frequency reference covering query execution order, join variations, window functions, 
+              aggregation, CTEs, and interview patterns to solve problems faster.
+            </p>
           </div>
-          <div class="loop-segmented-pill">
-            <button class="loop-segment-btn ${vibePlayer.loopMode === 'all' ? 'active' : ''}" id="vibe-loop-btn-all" onclick="window.sqlTracker.setVibeLoopMode('all')">
-              <span class="segment-icon">🔁</span>
-              <span>Loop All Songs in Queue</span>
-            </button>
-            <button class="loop-segment-btn ${vibePlayer.loopMode === 'one' ? 'active' : ''}" id="vibe-loop-btn-one" onclick="window.sqlTracker.setVibeLoopMode('one')">
-              <span class="segment-icon">🔂</span>
-              <span>Loop One Song Infinitely</span>
+
+          <div class="cheatsheet-actions-bar">
+            <a href="/cheatsheet/DataLemur-SQL-Cheat-Sheet.pdf" download="DataLemur-SQL-Cheat-Sheet.pdf" class="btn-cheatsheet-action btn-cheatsheet-primary" title="Download PDF file">
+              <span>📥 Download PDF</span>
+            </a>
+            <a href="/cheatsheet/DataLemur-SQL-Cheat-Sheet.pdf" target="_blank" rel="noopener noreferrer" class="btn-cheatsheet-action" title="Open full PDF in a new tab">
+              <span>↗️ Fullscreen / New Tab</span>
+            </a>
+            <button type="button" class="btn-cheatsheet-action" onclick="window.sqlTracker.printCheatSheet()" title="Print cheat sheet">
+              <span>🖨️ Print</span>
             </button>
           </div>
         </div>
 
-        <!-- Master Deck & Player -->
-        <div class="vibe-master-deck">
-          
-          <!-- Left: Animated Vinyl Turntable Display -->
-          <div class="vibe-turntable-card">
-            <div class="vinyl-record-wrap">
-              <div class="vinyl-disc ${vibePlayer.isPlaying ? 'spinning' : ''}" id="vibe-main-vinyl">
-                <div class="vinyl-groove-ring ring-1"></div>
-                <div class="vinyl-groove-ring ring-2"></div>
-                <div class="vinyl-center-sticker">
-                  <span class="center-symbol">⚡</span>
-                  <span class="center-text">SQL VIBE</span>
-                </div>
+        <!-- Quick Concept Pills Bar -->
+        <div class="cheatsheet-quick-bar">
+          <span class="quick-bar-label">KEY PILLARS:</span>
+          <span class="quick-pill">⚡ <strong>Order:</strong> FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; SELECT &rarr; ORDER BY</span>
+          <span class="quick-pill">🔗 <strong>Joins:</strong> INNER &bull; LEFT &bull; RIGHT &bull; FULL &bull; CROSS</span>
+          <span class="quick-pill">📊 <strong>Window:</strong> ROW_NUMBER &bull; RANK &bull; DENSE_RANK &bull; NTILE &bull; LAG/LEAD</span>
+        </div>
+
+        <!-- PDF Frame Wrapper -->
+        <div class="cheatsheet-frame-wrapper">
+          <object data="/cheatsheet/DataLemur-SQL-Cheat-Sheet.pdf#view=FitH" type="application/pdf" class="cheatsheet-pdf-frame" id="cheatsheet-object">
+            <iframe src="/cheatsheet/DataLemur-SQL-Cheat-Sheet.pdf#view=FitH" class="cheatsheet-pdf-frame" id="cheatsheet-iframe" title="DataLemur SQL Cheat Sheet">
+              <div class="pdf-fallback-card">
+                <p>Your browser does not support inline PDF preview.</p>
+                <a href="/cheatsheet/DataLemur-SQL-Cheat-Sheet.pdf" target="_blank" class="btn-cheatsheet-action btn-cheatsheet-primary">
+                  <span>Open Cheat Sheet PDF &rarr;</span>
+                </a>
               </div>
-            </div>
-
-            <div class="deck-song-info">
-              <span class="deck-vibe-tag" id="vibe-main-song-tag">${escapeHtml(currentSong.tag)}</span>
-              <h3 class="deck-song-title" id="vibe-main-song-title">${escapeHtml(currentSong.title)}</h3>
-              <p class="deck-song-artist" id="vibe-main-song-artist">${escapeHtml(currentSong.artist)}</p>
-            </div>
-
-            <!-- Scrubber -->
-            <div class="vibe-scrubber-row">
-              <span class="time-readout" id="vibe-time-current">0:00</span>
-              <div class="vibe-progress-bar" onclick="window.sqlTracker.seekVibe(event)" title="Click to seek">
-                <div class="vibe-progress-fill" id="vibe-progress-fill" style="width: 0%;"></div>
-              </div>
-              <span class="time-readout" id="vibe-time-total">${currentSong.duration}</span>
-            </div>
-
-            <!-- Controls -->
-            <div class="deck-controls-row">
-              <button class="deck-btn deck-btn-prev" onclick="window.sqlTracker.prevVibeSong()" title="Previous Song (⏮)">⏮</button>
-              <button class="deck-btn deck-btn-main-play" id="vibe-main-play-btn" onclick="window.sqlTracker.toggleVibePlay()" title="Play / Pause">
-                ${vibePlayer.isPlaying ? '⏸ Pause' : '▶ Play'}
-              </button>
-              <button class="deck-btn deck-btn-next" onclick="window.sqlTracker.nextVibeSong()" title="Next Song (⏭)">⏭</button>
-            </div>
-
-            <!-- Volume Slider -->
-            <div class="deck-volume-row">
-              <span class="vol-icon">🔊</span>
-              <input type="range" class="vibe-vol-slider" min="0" max="1" step="0.05" value="${vibePlayer.volume}" oninput="window.sqlTracker.setVibeVolume(this.value)" title="Volume Slider">
-              <span class="vol-mode-badge" id="vibe-vol-mode-badge">${vibePlayer.loopMode === 'one' ? '🔂 Single Repeat' : '🔁 All Repeat'}</span>
-            </div>
-
-          </div>
-
-          <!-- Right: Playlist Tracks Table -->
-          <div class="vibe-playlist-card">
-            <div class="playlist-card-header">
-              <div>
-                <h4 class="playlist-header-title">Study Beats Tracklist</h4>
-                <p class="playlist-header-sub">Click any track to switch song immediately</p>
-              </div>
-              <span class="playlist-badge-count">7 Tracks</span>
-            </div>
-
-            <div class="playlist-table-wrap">
-              <table class="vibe-tracks-table">
-                <thead>
-                  <tr>
-                    <th style="width: 44px;">#</th>
-                    <th>Track & Artist</th>
-                    <th>Vibe Type</th>
-                    <th style="width: 60px;">Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${trackRowsHtml}
-                </tbody>
-              </table>
-            </div>
-
-            <div class="playlist-footer-note">
-              <span>💡 <strong>Background Listening:</strong> Music keeps playing seamlessly when you switch back to the <a href="#" onclick="window.sqlTracker.switchTab('sheet'); return false;">Roadmap</a> or <a href="#" onclick="window.sqlTracker.switchTab('timer'); return false;">Focus Timer</a>!</span>
-            </div>
-
-          </div>
-
+            </iframe>
+          </object>
         </div>
 
       </div>
     `;
+  }
 
-    updateVibeProgressUI();
+  function printCheatSheet() {
+    const iframe = document.getElementById('cheatsheet-iframe');
+    if (iframe && iframe.contentWindow) {
+      try {
+        iframe.contentWindow.print();
+        return;
+      } catch (e) {}
+    }
+    window.open('/cheatsheet/DataLemur-SQL-Cheat-Sheet.pdf', '_blank');
   }
 
   // =========================================================================
@@ -1879,16 +1475,7 @@
     switchAuthMode,
     submitAuth,
     logout,
-    // Study Beats with Monis APIs
-    playVibeSong,
-    toggleVibePlay,
-    nextVibeSong,
-    prevVibeSong,
-    setVibeLoopMode,
-    toggleVibeLoopMode,
-    seekVibe,
-    setVibeVolume,
-    hideFloatingDock
+    printCheatSheet
   };
 
   // Run theme immediately

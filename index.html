@@ -41,11 +41,8 @@
         <button class="motion-tab-pill tab-btn" data-tab="timer">
           <span>⏱ Focus Timer</span>
         </button>
-        <button class="motion-tab-pill tab-btn" data-tab="vibe" id="tab-vibe-btn" title="Study Beats with Monis">
-          <span>🎧 Study Beats</span>
-          <span class="vibe-nav-wave" id="nav-vibe-wave" style="display: none;">
-            <span></span><span></span><span></span>
-          </span>
+        <button class="motion-tab-pill tab-btn" data-tab="cheatsheet" id="tab-cheatsheet-btn" title="DataLemur SQL Cheat Sheet">
+          <span>📄 Cheat Sheet</span>
         </button>
       </nav>
 
@@ -105,8 +102,8 @@
         <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('timer')">
           <span>⏱ Launch Focus Timer</span>
         </button>
-        <button class="btn-secondary-action btn-hero-vibe" onclick="window.sqlTracker.switchTab('vibe')">
-          <span>🎧 Study Beats</span>
+        <button class="btn-secondary-action btn-hero-cheatsheet" onclick="window.sqlTracker.switchTab('cheatsheet')">
+          <span>📄 SQL Cheat Sheet</span>
         </button>
       </div>
     </section>
@@ -378,37 +375,6 @@ SELECT ..."></textarea>
       </div>
     </div>
   </footer>
-
-  <!-- Hidden Persistent Audio Element -->
-  <audio id="vibe-audio-element" preload="metadata"></audio>
-
-  <!-- Persistent Floating Vibe Mini Dock -->
-  <div id="vibe-floating-dock" class="vibe-floating-dock" style="display: none;">
-    <div class="floating-dock-left" onclick="window.sqlTracker.switchTab('vibe')" title="Open Study Beats with Monis">
-      <div class="dock-vinyl-icon" id="dock-vinyl-icon">
-        <div class="dock-vinyl-groove"></div>
-        <div class="dock-vinyl-center"></div>
-      </div>
-      <div class="dock-meta">
-        <div class="dock-tag">Study Beats with Monis 🎧</div>
-        <div class="dock-title" id="dock-song-title">Stan (Long Version)</div>
-      </div>
-    </div>
-    
-    <div class="dock-controls">
-      <button class="dock-btn" onclick="window.sqlTracker.prevVibeSong()" title="Previous Track">⏮</button>
-      <button class="dock-btn dock-btn-play" id="dock-play-btn" onclick="window.sqlTracker.toggleVibePlay()" title="Play / Pause">▶</button>
-      <button class="dock-btn" onclick="window.sqlTracker.nextVibeSong()" title="Next Track">⏭</button>
-      
-      <!-- Loop Switcher Pill -->
-      <button class="dock-loop-pill" id="dock-loop-btn" onclick="window.sqlTracker.toggleVibeLoopMode()" title="Toggle Loop Mode (Loop All / Loop One)">
-        <span id="dock-loop-icon">🔁</span>
-        <span id="dock-loop-text">Loop All</span>
-      </button>
-
-      <button class="dock-btn dock-btn-close" onclick="window.sqlTracker.hideFloatingDock()" title="Hide Mini Player">✕</button>
-    </div>
-  </div>
 
   <!-- Scripts -->
   <script src="js/data.js"></script>
