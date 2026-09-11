@@ -28,7 +28,7 @@
         </div>
       </a>
 
-      <!-- Center Tabs: Roadmap, Focus Timer, Spaced Repetition, Match Song Vibe -->
+      <!-- Center Tabs: Roadmap, Focus Timer, Match Song Vibe -->
       <nav class="motion-nav-center">
         <button class="motion-tab-pill active tab-btn" data-tab="sheet">
           <span>Roadmap</span>
@@ -36,10 +36,6 @@
         </button>
         <button class="motion-tab-pill tab-btn" data-tab="timer">
           <span>⏱ Focus Timer</span>
-        </button>
-        <button class="motion-tab-pill tab-btn" data-tab="revision">
-          <span>Spaced Repetition</span>
-          <span class="pill-counter" id="tab-revision-count">0</span>
         </button>
         <button class="motion-tab-pill tab-btn" data-tab="vibe" id="tab-vibe-btn" title="Match Song Vibe with Monis">
           <span>🎧 Match Song Vibe</span>
@@ -49,26 +45,8 @@
         </button>
       </nav>
 
-      <!-- Right Tools: Mini Sync Timer, Mini Vibe Player & User Auth -->
+      <!-- Right Tools: Theme Switcher & User Auth -->
       <div class="motion-nav-actions">
-        
-        <!-- Header Mini Timer (Click to switch to Focus Timer tab) -->
-        <div class="motion-timer-box" onclick="window.sqlTracker.switchTab('timer')" title="Click to open Fullscreen Focus Timer">
-          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--foreground-feint);">TIMER</span>
-          <div class="motion-timer-display" id="header-mini-timer-time">15:00</div>
-          <button class="timer-btn" id="header-timer-toggle-btn" onclick="event.stopPropagation(); window.sqlTracker.toggleTimer();" title="Start / Pause">▶</button>
-        </div>
-
-        <!-- Header Mini Vibe Controller -->
-        <div class="motion-vibe-box" id="header-vibe-box" onclick="window.sqlTracker.switchTab('vibe')" title="Match Song Vibe with Monis">
-          <span class="vibe-icon-note">🎵</span>
-          <div class="vibe-mini-info">
-            <span class="vibe-mini-label">VIBE</span>
-            <span class="vibe-mini-song" id="header-vibe-song-title">Off</span>
-          </div>
-          <button class="timer-btn" id="header-vibe-toggle-btn" onclick="event.stopPropagation(); window.sqlTracker.toggleVibePlay();" title="Play / Pause Vibe">▶</button>
-        </div>
-
         <!-- Theme Switcher (White / Dark) -->
         <button type="button" class="theme-toggle-btn" id="theme-toggle-btn" onclick="window.sqlTracker.toggleTheme()" title="Toggle White/Dark Theme">
           <span class="theme-toggle-icon" id="theme-toggle-icon">☀️</span>
@@ -83,7 +61,6 @@
             <span aria-hidden="true">&rarr;</span>
           </button>
         </div>
-
       </div>
 
     </div>
@@ -120,9 +97,6 @@
         </a>
         <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('timer')">
           <span>⏱ Launch Focus Timer</span>
-        </button>
-        <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('revision')">
-          <span>🔁 Spaced Repetition Queue</span>
         </button>
         <button class="btn-secondary-action btn-hero-vibe" onclick="window.sqlTracker.switchTab('vibe')">
           <span>🎵 Match Song Vibe with Monis</span>
@@ -168,17 +142,7 @@
         <div class="fresh-rule-desc">Marked as solved ✓</div>
       </div>
 
-      <!-- Col 3: Revision Queue -->
-      <div class="fresh-rule-col" style="cursor: pointer;" onclick="window.sqlTracker.switchTab('revision')" title="Click to view Revision Queue">
-        <div class="fresh-rule-kicker">
-          <span>Revision Queue</span>
-          <span>3-4 DAYS</span>
-        </div>
-        <div class="fresh-rule-val val-rose" id="stat-revision">0</div>
-        <div class="fresh-rule-desc">Marked for review 🔁</div>
-      </div>
-
-      <!-- Col 4: Remaining & Difficulty -->
+      <!-- Col 3: Remaining & Difficulty -->
       <div class="fresh-rule-col">
         <div class="fresh-rule-kicker">
           <span>Remaining</span>
@@ -224,7 +188,6 @@
           <span class="filter-label">STATUS:</span>
           <button type="button" class="filter-status-btn active" data-val="all" onclick="window.sqlTracker.setStatusFilter('all')">All</button>
           <button type="button" class="filter-status-btn" data-val="solved" onclick="window.sqlTracker.setStatusFilter('solved')">✓ Done</button>
-          <button type="button" class="filter-status-btn" data-val="revision" onclick="window.sqlTracker.setStatusFilter('revision')">🔁 Revision</button>
           <button type="button" class="filter-status-btn" data-val="notstarted" onclick="window.sqlTracker.setStatusFilter('notstarted')">○ Unsolved</button>
         </div>
 

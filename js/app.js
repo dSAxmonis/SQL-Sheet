@@ -480,9 +480,6 @@
     if (state.activeTab === 'timer') {
       if (controlsSection) controlsSection.style.display = 'none';
       renderFocusTimerView(container);
-    } else if (state.activeTab === 'revision') {
-      if (controlsSection) controlsSection.style.display = 'none';
-      renderRevisionQueue(container);
     } else if (state.activeTab === 'vibe') {
       if (controlsSection) controlsSection.style.display = 'none';
       renderVibeSongView(container);
@@ -777,21 +774,13 @@
           <span class="motion-diff-pill ${diffClass}">${escapeHtml(q.difficulty)}</span>
         </td>
 
-        <td class="question-cell" style="width: 185px;">
-          <div class="status-toggle-group">
-            <button type="button" class="btn-mark btn-done ${qData.status === 'solved' ? 'active' : ''}" 
-                    onclick="event.stopPropagation(); window.sqlTracker.toggleDone('${q.id}')" 
-                    title="${qData.status === 'solved' ? 'Completed (Click to unmark)' : 'Mark as Done'}">
-              <span class="btn-icon">${qData.status === 'solved' ? '✓' : '○'}</span>
-              <span>Done</span>
-            </button>
-            <button type="button" class="btn-mark btn-rev ${qData.status === 'revision' ? 'active' : ''}" 
-                    onclick="event.stopPropagation(); window.sqlTracker.toggleRevision('${q.id}')" 
-                    title="${qData.status === 'revision' ? 'In Revision Queue (Click to unmark)' : 'Mark for Revision'}">
-              <span>🔁</span>
-              <span>Revise</span>
-            </button>
-          </div>
+        <td class="question-cell" style="width: 130px;">
+          <button type="button" class="btn-mark btn-done ${qData.status === 'solved' ? 'active' : ''}" 
+                  onclick="event.stopPropagation(); window.sqlTracker.toggleDone('${q.id}')" 
+                  title="${qData.status === 'solved' ? 'Completed (Click to unmark)' : 'Mark as Done'}">
+            <span class="btn-icon">${qData.status === 'solved' ? '✓' : '○'}</span>
+            <span>${qData.status === 'solved' ? 'Done' : 'Mark Done'}</span>
+          </button>
         </td>
 
         <td class="question-cell" style="width: 160px;">
@@ -1394,13 +1383,9 @@
       btnDone.classList.toggle('active', isDone);
       const icon = btnDone.querySelector('.btn-icon');
       if (icon) icon.textContent = isDone ? '✓' : '○';
+      const label = btnDone.querySelector('span:last-child');
+      if (label) label.textContent = isDone ? 'Done' : 'Mark Done';
       btnDone.title = isDone ? 'Completed (Click to unmark)' : 'Mark as Done';
-    }
-
-    if (btnRev) {
-      const isRev = status === 'revision';
-      btnRev.classList.toggle('active', isRev);
-      btnRev.title = isRev ? 'In Revision Queue (Click to unmark)' : 'Mark for Revision';
     }
 
     return true;
@@ -1415,9 +1400,6 @@
     if (newStatus === 'solved') {
       state.progress[qId].solvedAt = new Date().toISOString();
       showToast('Marked as Done! 🎉', 'success');
-    } else if (newStatus === 'revision') {
-      state.progress[qId].markedDate = new Date().toISOString();
-      showToast('Added to Revision Queue 🔁', 'warn');
     } else if (newStatus === 'notstarted') {
       showToast('Status reset to unsolved', 'info');
     }
@@ -1433,8 +1415,8 @@
     }
     updateAllMetrics();
 
-    // If on revision tab or a status filter is filtering this row out, re-render
-    if (state.activeTab === 'revision' || (state.filters.status && state.filters.status !== 'all') || !rowUpdated) {
+    // If a status filter is filtering this row out, re-render
+    if ((state.filters.status && state.filters.status !== 'all') || !rowUpdated) {
       renderMain();
     }
   }
