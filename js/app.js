@@ -217,6 +217,8 @@
     updateTimerDisplays();
     renderMain();
     updateAllMetrics();
+    removeBottomRightPopups();
+    setInterval(removeBottomRightPopups, 1500);
 
     if (state.token) {
       await fetchUserProgressFromAPI();
@@ -1158,19 +1160,24 @@
     }
   }
 
-  // Toast Notifications
+  // Bottom-Right Popups disabled per user request
   function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const toast = document.createElement('div');
-    toast.className = `toast-item ${type}`;
-    toast.textContent = `// ${message}`;
-    container.appendChild(toast);
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(6px)';
-      setTimeout(() => toast.remove(), 250);
-    }, 3200);
+    // Disabled (no popups on right bottom corner)
+  }
+
+  function removeBottomRightPopups() {
+    const selectors = [
+      '.toast-container',
+      '.toast-item',
+      '[data-netlify-badge]',
+      '.netlify-badge',
+      '#netlify-badge',
+      '.netlify-drawer',
+      'a[href*="netlify.com"]'
+    ];
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => el.remove());
+    });
   }
 
   function escapeHtml(str) {

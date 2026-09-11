@@ -1555,38 +1555,29 @@ header.motion-nav {
   font-weight: 700;
 }
 
-/* Toast Notifications */
-.toast-container {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
-}
-
+/* Bottom-Right Popups & Floating Badges Removed per user request */
+.toast-container,
 .toast-item {
-  background: var(--surface-raised);
-  border: 1px solid var(--border-strong);
-  color: var(--foreground);
-  padding: 10px 16px;
-  border-radius: var(--radius-full);
-  font-size: 12.5px;
-  font-family: var(--font-mono);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  pointer-events: auto;
-  animation: toastIn 0.2s ease;
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
 
-.toast-item.success { border-color: var(--color-green); color: var(--color-green); }
-.toast-item.warn { border-color: var(--accent); color: var(--accent); }
-.toast-item.info { border-color: var(--color-blue); color: var(--color-blue); }
-
-@keyframes toastIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Hide Netlify floating drawer & badge on bottom right */
+[data-netlify-badge],
+.netlify-badge,
+#netlify-badge,
+.netlify-drawer,
+[class*="netlify-drawer"],
+[class*="netlify-badge"],
+[id*="netlify-badge"],
+a[href*="netlify.com"][style*="fixed"],
+div[class*="netlify-identity"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
 
 /* Footer */
