@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL. 20-Day Interview Preparation & Practice Roadmap</title>
+  <meta name="description" content="A 20-day, question-only SQL practice roadmap with progress tracking, direct links, and spaced repetition.">
+  
+  <!-- Inter & JetBrains Mono Fonts (motion.dev typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation (Motion.dev style) -->
+  <header class="motion-nav">
+    <div class="container motion-nav-inner">
+      
+      <!-- Brand lockup -->
+      <a href="#" class="motion-brand" onclick="window.sqlTracker.switchTab('sheet'); return false;">
+        <div class="motion-logo-glyph">⚡</div>
+        <div class="motion-brand-title">
+          <h1><em>SQL.</em></h1>
+          <span class="motion-tag">Roadmap 2.0</span>
+        </div>
+      </a>
+
+      <!-- Center Tabs: Roadmap, Focus Timer, Spaced Repetition -->
+      <nav class="motion-nav-center">
+        <button class="motion-tab-pill active tab-btn" data-tab="sheet">
+          <span>Roadmap</span>
+          <span class="pill-counter">20 Days</span>
+        </button>
+        <button class="motion-tab-pill tab-btn" data-tab="timer">
+          <span>⏱ Focus Timer</span>
+        </button>
+        <button class="motion-tab-pill tab-btn" data-tab="revision">
+          <span>Spaced Repetition</span>
+          <span class="pill-counter" id="tab-revision-count">0</span>
+        </button>
+      </nav>
+
+      <!-- Right Tools: Mini Sync Timer & User Auth (Export/Import/Reset removed per user request) -->
+      <div class="motion-nav-actions">
+        
+        <!-- Header Mini Timer (Click to switch to Focus Timer tab) -->
+        <div class="motion-timer-box" onclick="window.sqlTracker.switchTab('timer')" title="Click to open Fullscreen Focus Timer">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--foreground-feint);">TIMER</span>
+          <div class="motion-timer-display" id="header-mini-timer-time">15:00</div>
+          <button class="timer-btn" id="header-timer-toggle-btn" onclick="event.stopPropagation(); window.sqlTracker.toggleTimer();" title="Start / Pause">▶</button>
+        </div>
+
+        <!-- User Authentication Badge / Trigger -->
+        <div id="auth-status-container">
+          <!-- Populated by app.js: Either user profile pill or 'Sign In' button -->
+          <button class="btn-auth-trigger" onclick="window.sqlTracker.openAuthModal()">
+            <span>Sign In</span>
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="home-hero">
+      <div class="hero-meta-kicker">
+        <span>20 Days</span>
+        <span class="bullet">&bull;</span>
+        <span>222 Questions</span>
+        <span class="bullet">&bull;</span>
+        <span>Multi-User Database</span>
+        <span class="bullet">&bull;</span>
+        <span>Pure Problem Solving</span>
+      </div>
+
+      <h1 class="home-hero-title">
+        <em>SQL.</em><br>
+        Topic-wise interview preparation.
+      </h1>
+
+      <p class="home-hero-subline">
+        Solve every question on LeetCode, HackerRank, DataLemur, and StrataScratch. Progress and notes are automatically saved to your private database account.
+      </p>
+
+      <div class="hero-cta-row">
+        <a href="#day-card-1" class="fresh-primary-action" onclick="window.sqlTracker.switchTab('sheet');">
+          <span>Start Practice</span>
+          <span aria-hidden="true">&darr;</span>
+        </a>
+        <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('timer')">
+          <span>⏱ Launch Focus Timer</span>
+        </button>
+        <button class="btn-secondary-action" onclick="window.sqlTracker.switchTab('revision')">
+          <span>🔁 Spaced Repetition Queue</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Study Buddy Comparison Bar -->
+    <section class="study-buddy-bar" id="study-buddy-bar" style="display: none;">
+      <div class="study-buddy-title">
+        <span>👥 Study Buddy Progress</span>
+      </div>
+      <div class="study-buddy-users" id="study-buddy-list">
+        <!-- Filled with users and their progress -->
+      </div>
+    </section>
+
+    <!-- Motion.dev Signature Rule Grid -->
+    <section class="fresh-rule-grid" aria-label="Roadmap progress metrics">
+      
+      <!-- Col 1: Overall Progress -->
+      <div class="fresh-rule-col">
+        <div class="fresh-rule-kicker">
+          <span>Overall Progress</span>
+          <span>%</span>
+        </div>
+        <div class="fresh-rule-val val-accent" id="progress-percent-text">0%</div>
+        <div class="fresh-rule-desc">
+          <span id="stat-total-solved" style="font-weight: 700; color: #fff;">0</span> of 222 problems solved
+        </div>
+        <div class="rule-progress-line">
+          <div class="rule-progress-fill" id="overall-rule-progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Col 2: Remaining -->
+      <div class="fresh-rule-col">
+        <div class="fresh-rule-kicker">
+          <span>Remaining</span>
+          <span>TARGET</span>
+        </div>
+        <div class="fresh-rule-val val-blue" id="stat-remaining">222</div>
+        <div class="fresh-rule-desc">Pace: ~11 questions / day</div>
+      </div>
+
+      <!-- Col 3: In Progress -->
+      <div class="fresh-rule-col">
+        <div class="fresh-rule-kicker">
+          <span>In Progress</span>
+          <span>ACTIVE</span>
+        </div>
+        <div class="fresh-rule-val" style="color: var(--color-amber);" id="stat-inprogress">0</div>
+        <div class="fresh-rule-desc">Currently practicing</div>
+      </div>
+
+      <!-- Col 4: Revision Queue -->
+      <div class="fresh-rule-col" style="cursor: pointer;" onclick="window.sqlTracker.switchTab('revision')">
+        <div class="fresh-rule-kicker">
+          <span>Revision Queue</span>
+          <span>3-4 DAYS</span>
+        </div>
+        <div class="fresh-rule-val val-rose" id="stat-revision">0</div>
+        <div class="fresh-rule-desc">Marked for recall &rarr;</div>
+      </div>
+
+      <!-- Col 5: Difficulty Tiers -->
+      <div class="fresh-rule-col">
+        <div class="fresh-rule-kicker">
+          <span>Difficulty</span>
+          <span>RATIO</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
+            <span style="color: var(--color-green);">Easy</span>
+            <span id="diff-easy-count" style="color: var(--foreground-muted);">0/70</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
+            <span style="color: var(--color-amber);">Medium</span>
+            <span id="diff-medium-count" style="color: var(--foreground-muted);">0/112</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px;">
+            <span style="color: var(--color-rose);">Hard</span>
+            <span id="diff-hard-count" style="color: var(--foreground-muted);">0/40</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Controls & Filtering Toolbar (visible on Roadmap tab) -->
+    <section class="motion-controls-bar" id="controls-bar-section">
+      <div class="controls-top-row">
+        
+        <!-- Search -->
+        <div class="motion-search-input-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="global-search-input" class="motion-search-input" placeholder="Search problems, concepts, platforms, or days...">
+        </div>
+
+        <!-- Accordion Controls -->
+        <div class="motion-view-controls">
+          <button class="btn-ghost-sm" onclick="window.sqlTracker.expandAllDays()">Expand All</button>
+          <button class="btn-ghost-sm" onclick="window.sqlTracker.collapseAllDays()">Collapse All</button>
+          <button class="btn-reset-text" onclick="window.sqlTracker.resetFilters()">Clear Filters</button>
+        </div>
+
+      </div>
+
+      <!-- Filters -->
+      <div class="motion-filter-row">
+        <span class="filter-kicker">PHASE:</span>
+        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Foundation">Foundation</button>
+        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Core">Core</button>
+        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Intermediate">Intermediate</button>
+        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Advanced">Advanced</button>
+        <button class="motion-chip filter-chip" data-filter-type="phase" data-filter-val="Capstone">Capstone</button>
+
+        <span class="filter-kicker" style="margin-left: 12px;">PLATFORM:</span>
+        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="LeetCode">LeetCode</button>
+        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="HackerRank">HackerRank</button>
+        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="DataLemur">DataLemur</button>
+        <button class="motion-chip filter-chip" data-filter-type="platform" data-filter-val="StrataScratch">StrataScratch</button>
+
+        <span class="filter-kicker" style="margin-left: 12px;">DIFFICULTY:</span>
+        <button class="motion-chip filter-chip" data-filter-type="difficulty" data-filter-val="Easy">Easy</button>
+        <button class="motion-chip filter-chip" data-filter-type="difficulty" data-filter-val="Medium">Medium</button>
+        <button class="motion-chip filter-chip" data-filter-type="difficulty" data-filter-val="Hard">Hard</button>
+
+        <span class="filter-kicker" style="margin-left: 12px;">STATUS:</span>
+        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="notstarted">Not Started</button>
+        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="inprogress">In Progress</button>
+        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="solved">Solved</button>
+        <button class="motion-chip filter-chip" data-filter-type="status" data-filter-val="revision">Needs Revision</button>
+      </div>
+    </section>
+
+    <!-- Main Content Container (Populated dynamically: Roadmap, Focus Timer, or Spaced Repetition) -->
+    <div id="main-content-container"></div>
+
+  </main>
+
+  <!-- Question Notes Modal (Motion.dev Modal Palette) -->
+  <div class="modal-overlay" id="notes-modal">
+    <div class="modal-palette wide">
+      <div class="modal-palette-header">
+        <div>
+          <h3 id="modal-q-title">Question Title</h3>
+          <div id="modal-q-meta" style="font-family: var(--font-mono); font-size: 11px; color: var(--foreground-muted); margin-top: 4px;"></div>
+        </div>
+        <button class="btn-close-clean" onclick="window.sqlTracker.closeNotes()">&times;</button>
+      </div>
+
+      <div class="modal-palette-body">
+        <div>
+          <label class="form-label-mono" for="modal-time-input">Time Taken to Solve</label>
+          <input type="text" id="modal-time-input" class="form-input-clean" placeholder="e.g. 14 minutes (no editorial)">
+        </div>
+
+        <div>
+          <label class="form-label-mono" for="modal-notes-input">Key Takeaways, Edge Cases & Logic</label>
+          <textarea id="modal-notes-input" class="form-input-clean" style="min-height: 90px; resize: vertical;" placeholder="Document edge cases, NULL nuances, join pitfalls, or query plan insights..."></textarea>
+        </div>
+
+        <div>
+          <label class="form-label-mono" for="modal-code-input">SQL Solution</label>
+          <textarea id="modal-code-input" class="form-code-area" rows="8" placeholder="-- Optimal SQL query
+SELECT ..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-palette-footer">
+        <button class="btn-secondary-action" onclick="window.sqlTracker.closeNotes()">Cancel</button>
+        <button class="fresh-primary-action" onclick="window.sqlTracker.saveCurrentNotes()">Save Solution &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Authentication Modal (Sign In / Register) -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-palette">
+      <div class="modal-palette-header">
+        <h3 id="auth-modal-title">Account Sign In</h3>
+        <button class="btn-close-clean" onclick="window.sqlTracker.closeAuthModal()">&times;</button>
+      </div>
+
+      <div class="modal-palette-body">
+        
+        <div class="auth-tabs-row">
+          <button class="auth-tab-btn active" id="auth-tab-login" onclick="window.sqlTracker.switchAuthMode('login')">Sign In</button>
+          <button class="auth-tab-btn" id="auth-tab-register" onclick="window.sqlTracker.switchAuthMode('register')">Create Account</button>
+        </div>
+
+        <div id="auth-error-msg" style="display: none; font-family: var(--font-mono); font-size: 11.5px; color: var(--color-rose); background: var(--color-rose-feint); padding: 8px 12px; border-radius: var(--radius-xs);"></div>
+
+        <div>
+          <label class="form-label-mono" for="auth-username">Username</label>
+          <input type="text" id="auth-username" class="form-input-clean" placeholder="e.g. monis" autocomplete="username">
+        </div>
+
+        <div id="auth-displayname-group" style="display: none;">
+          <label class="form-label-mono" for="auth-displayname">Display Name</label>
+          <input type="text" id="auth-displayname" class="form-input-clean" placeholder="e.g. Monis Husain">
+        </div>
+
+        <div>
+          <label class="form-label-mono" for="auth-password">Password</label>
+          <input type="password" id="auth-password" class="form-input-clean" placeholder="Enter password" autocomplete="current-password">
+        </div>
+
+        <div id="auth-invite-group" style="display: none;">
+          <label class="form-label-mono" for="auth-invite">Secret Invite Passcode</label>
+          <input type="text" id="auth-invite" class="form-input-clean" placeholder="Secret invite code (default: SQL2026)">
+          <span style="font-size: 11px; color: var(--foreground-feint); margin-top: 4px; display: block;">
+            Protects your website so only you and your friend can create accounts.
+          </span>
+        </div>
+
+      </div>
+
+      <div class="modal-palette-footer">
+        <button class="btn-secondary-action" onclick="window.sqlTracker.closeAuthModal()">Cancel</button>
+        <button class="fresh-primary-action" id="auth-submit-btn" onclick="window.sqlTracker.submitAuth()">
+          <span>Sign In</span>
+          <span aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="container motion-footer">
+    <div>
+      <strong>SQL.</strong> 20-Day Practice Roadmap &bull; Question-Only Preparation System
+    </div>
+    <div style="font-family: var(--font-mono); font-size: 11px;">
+      SQLite Database &bull; JWT Auth &bull; 2-User Study Sharing Ready
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

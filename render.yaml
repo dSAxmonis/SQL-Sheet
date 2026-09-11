@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sql-interview-tracker
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: INVITE_CODE
+        value: SQL2026
+      - key: JWT_SECRET
+        generateValue: true

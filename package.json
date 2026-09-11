@@ -1,0 +1,21 @@
+{
+  "name": "sql-practice",
+  "version": "1.0.0",
+  "description": "A specialized, distraction-free self-practice website built with a **[Motion.dev](https://motion.dev/) inspired user interface**: clean carbon-dark theme, signature yellow/amber accents, hairline rule grids, technical monospace readouts, and snappy zero-clutter interactions for mastering the **20-Day SQL Interview Preparation Roadmap**.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "sqlite3": "^6.0.1"
+  }
+}
