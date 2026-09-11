@@ -443,11 +443,14 @@
         inProgressCount++;
       } else if (qData.status === 'revision') {
         revisionCount++;
+        diffStats[diff].solved++;
       }
     });
 
-    const remainingCount = totalCount - solvedCount;
-    const percent = totalCount > 0 ? Math.round((solvedCount / totalCount) * 100) : 0;
+    // Overall Progress includes both solved and revision problems (done + revision)
+    const overallCompleted = solvedCount + revisionCount;
+    const remainingCount = Math.max(0, totalCount - overallCompleted);
+    const percent = totalCount > 0 ? Math.round((overallCompleted / totalCount) * 100) : 0;
 
     const circleText = document.getElementById('progress-percent-text');
     const ruleProgressBar = document.getElementById('overall-rule-progress-bar');
@@ -460,7 +463,7 @@
     const elRevision = document.getElementById('stat-revision');
     const tabRevisionBadge = document.getElementById('tab-revision-count');
 
-    if (elTotal) elTotal.textContent = solvedCount;
+    if (elTotal) elTotal.textContent = overallCompleted;
     if (elDone) elDone.textContent = solvedCount;
     if (elRemaining) elRemaining.textContent = remainingCount;
     if (elRevision) elRevision.textContent = revisionCount;
@@ -485,7 +488,8 @@
     const dayTotal = dayObj.questions.length;
     let daySolved = 0;
     dayObj.questions.forEach(q => {
-      if (getQuestionData(q.id).status === 'solved') daySolved++;
+      const status = getQuestionData(q.id).status;
+      if (status === 'solved' || status === 'revision') daySolved++;
     });
     const dayPct = dayTotal > 0 ? Math.round((daySolved / dayTotal) * 100) : 0;
 
