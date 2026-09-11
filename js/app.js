@@ -21,6 +21,7 @@
     token: null,
     progress: {},       // { [qId]: { status, notes, code, timeSpent, markedDate, solvedAt } }
     openDays: [1],      // Default day 1 open
+    revealedHints: new Set(), // Set of qIds with revealed hints
     activeTab: 'sheet',  // 'sheet' | 'timer' | 'revision'
     filters: {
       search: '',
@@ -57,20 +58,29 @@
       osc1.connect(gain1);
       gain1.connect(ctx.destination);
       osc1.start(now);
-      osc1.stop(now + 1.2);
+      osc1.stop(now + 0.18);
 
-      // Note 2: G#5 (830Hz)
+      // Note 2: G#5 (830.6Hz)
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
-      osc2.frequency.setValueAtTime(830.61, now + 0.25);
-      gain2.gain.setValueAtTime(0.3, now + 0.25);
-      gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      osc2.frequency.setValueAtTime(830.61, now + 0.15);
+      gain2.gain.setValueAtTime(0.35, now + 0.15);
       osc2.connect(gain2);
       gain2.connect(ctx.destination);
-      osc2.start(now + 0.25);
-      osc2.stop(now + 1.5);
+      osc2.start(now + 0.15);
+      osc2.stop(now + 0.35);
+
+      // Note 3: B5 (987.77Hz)
+      const osc3 = ctx.createOscillator();
+      const gain3 = ctx.createGain();
+      osc3.frequency.setValueAtTime(987.77, now + 0.32);
+      gain3.gain.setValueAtTime(0.4, now + 0.32);
+      osc3.connect(gain3);
+      gain3.connect(ctx.destination);
+      osc3.start(now + 0.32);
+      osc3.stop(now + 0.7);
     } catch (e) {
-      console.warn('Audio not supported or blocked:', e);
+      console.warn('Audio Context error:', e);
     }
   }
 
@@ -92,8 +102,24 @@
         if (parsed.progress) state.progress = parsed.progress;
         if (Array.isArray(parsed.openDays)) state.openDays = parsed.openDays;
       }
+
+      const savedHints = localStorage.getItem('sql_tracker_revealed_hints');
+      if (savedHints) {
+        const parsedHints = JSON.parse(savedHints);
+        if (Array.isArray(parsedHints)) {
+          state.revealedHints = new Set(parsedHints);
+        }
+      }
     } catch (e) {
       console.error('Error reading localStorage:', e);
+    }
+  }
+
+  function saveRevealedHints() {
+    try {
+      localStorage.setItem('sql_tracker_revealed_hints', JSON.stringify(Array.from(state.revealedHints || [])));
+    } catch (e) {
+      console.error('Error saving revealed hints:', e);
     }
   }
 
@@ -491,6 +517,7 @@
       renderRoadmapSheet(container);
     }
     updateAllMetrics();
+    updateToggleAllHintsButton();
   }
 
   // =========================================================================
@@ -749,6 +776,92 @@
     container.innerHTML = html;
   }
 
+  function renderTopicHint(q) {
+    if (!q.tag) return '';
+    const isRevealed = state.revealedHints && state.revealedHints.has(q.id);
+    return `
+      <div class="topic-hint-wrapper" data-qid="${escapeHtml(q.id)}">
+        <button type="button" class="btn-topic-hint" style="${isRevealed ? 'display: none;' : 'display: inline-flex;'}" 
+                onclick="event.stopPropagation(); window.sqlTracker.toggleHint('${escapeHtml(q.id)}')" 
+                title="Click to reveal topic hint">
+          <span class="hint-bulb">💡</span>
+          <span class="hint-text">Hint</span>
+        </button>
+        <div class="topic-hint-revealed" style="${isRevealed ? 'display: inline-flex;' : 'display: none;'}">
+          <span class="motion-readout-code hint-code" onclick="event.stopPropagation(); window.sqlTracker.toggleHint('${escapeHtml(q.id)}')" title="Click to hide hint">{ ${escapeHtml(q.tag)} }</span>
+          <button type="button" class="btn-hint-close" 
+                  onclick="event.stopPropagation(); window.sqlTracker.toggleHint('${escapeHtml(q.id)}')" 
+                  title="Hide topic hint">&times;</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function toggleHint(qId) {
+    if (!state.revealedHints) state.revealedHints = new Set();
+    if (state.revealedHints.has(qId)) {
+      state.revealedHints.delete(qId);
+    } else {
+      state.revealedHints.add(qId);
+    }
+    saveRevealedHints();
+
+    const isRevealed = state.revealedHints.has(qId);
+    const wrappers = document.querySelectorAll(`.topic-hint-wrapper[data-qid="${qId}"]`);
+    wrappers.forEach(w => {
+      const btn = w.querySelector('.btn-topic-hint');
+      const rev = w.querySelector('.topic-hint-revealed');
+      if (btn && rev) {
+        if (isRevealed) {
+          btn.style.display = 'none';
+          rev.style.display = 'inline-flex';
+        } else {
+          btn.style.display = 'inline-flex';
+          rev.style.display = 'none';
+        }
+      }
+    });
+
+    updateToggleAllHintsButton();
+  }
+
+  function toggleAllHints() {
+    if (!state.revealedHints) state.revealedHints = new Set();
+    const allQuestions = getAllQuestions();
+    const questionsWithTags = allQuestions.filter(q => Boolean(q.tag));
+    const allRevealed = questionsWithTags.length > 0 && questionsWithTags.every(q => state.revealedHints.has(q.id));
+
+    if (allRevealed) {
+      state.revealedHints.clear();
+    } else {
+      questionsWithTags.forEach(q => state.revealedHints.add(q.id));
+    }
+    saveRevealedHints();
+
+    document.querySelectorAll('.topic-hint-wrapper').forEach(w => {
+      const qId = w.getAttribute('data-qid');
+      const isRevealed = state.revealedHints.has(qId);
+      const btn = w.querySelector('.btn-topic-hint');
+      const rev = w.querySelector('.topic-hint-revealed');
+      if (btn && rev) {
+        btn.style.display = isRevealed ? 'none' : 'inline-flex';
+        rev.style.display = isRevealed ? 'inline-flex' : 'none';
+      }
+    });
+
+    updateToggleAllHintsButton();
+  }
+
+  function updateToggleAllHintsButton() {
+    const btn = document.getElementById('btn-toggle-all-hints');
+    if (!btn) return;
+    const allQuestions = getAllQuestions();
+    const questionsWithTags = allQuestions.filter(q => Boolean(q.tag));
+    const allRevealed = questionsWithTags.length > 0 && questionsWithTags.every(q => state.revealedHints.has(q.id));
+    btn.innerHTML = allRevealed ? '💡 Hide All Hints' : '💡 Hints';
+    btn.classList.toggle('active-filter-pill', allRevealed);
+  }
+
   function renderQuestionRow(q, dayNum) {
     const qData = getQuestionData(q.id);
     const platformClass = `platform-${q.platform.toLowerCase()}`;
@@ -765,7 +878,7 @@
         <td class="question-cell">
           <div class="cell-info">
             <span class="q-title-text">${escapeHtml(q.title)}</span>
-            ${q.tag ? `<span class="motion-readout-code">{ ${escapeHtml(q.tag)} }</span>` : ''}
+            ${renderTopicHint(q)}
           </div>
         </td>
 
@@ -866,7 +979,7 @@
                       <td class="question-cell">
                         <div class="cell-info">
                           <span class="q-title-text">${escapeHtml(q.title)} ${dueBadge}</span>
-                          ${q.tag ? `<span class="motion-readout-code">{ ${escapeHtml(q.tag)} }</span>` : ''}
+                          ${renderTopicHint(q)}
                         </div>
                       </td>
                       <td class="question-cell"><span class="motion-platform-pill platform-${q.platform.toLowerCase()}">${escapeHtml(q.platform)}</span></td>
@@ -1741,6 +1854,8 @@
     updateStatus,
     toggleDone,
     toggleRevision,
+    toggleHint,
+    toggleAllHints,
     setStatusFilter,
     setFilter,
     nextSqlJoke: pokeCatJoke,
